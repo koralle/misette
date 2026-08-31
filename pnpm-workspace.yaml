@@ -1,0 +1,13 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+
+catalogMode: strict
+
+catalogs: 
+
+saveExact: true
+
+trustPolicy: no-downgrade
+
