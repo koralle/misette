@@ -12,6 +12,7 @@
     "format:check": "oxfmt . --check"
   },
   "devDependencies": {
+    "lefthook": "catalog:githooks",
     "oxfmt": "catalog:lint"
   },
   "devEngines": {
