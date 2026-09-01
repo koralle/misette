@@ -8,13 +8,22 @@
   "author": "",
   "type": "module",
   "scripts": {
+    "build": "turbo run build",
+    "cf-typegen": "turbo run cf-typegen",
+    "check": "turbo run check --continue",
+    "deploy": "turbo run deploy",
+    "dev": "turbo run dev",
     "format": "oxfmt .",
-    "format:check": "oxfmt . --check"
+    "format:check": "oxfmt . --check",
+    "lint": "turbo run lint --continue",
+    "preview": "turbo run preview",
+    "typecheck": "turbo run typecheck --continue"
   },
   "devDependencies": {
     "@tsconfig/strictest": "catalog:typescript",
     "lefthook": "catalog:githooks",
     "oxfmt": "catalog:lint",
+    "turbo": "catalog:tooling",
     "typescript": "catalog:typescript"
   },
   "devEngines": {
