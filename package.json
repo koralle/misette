@@ -15,7 +15,8 @@
     "dev": "turbo run dev",
     "format": "oxfmt .",
     "format:check": "oxfmt . --check",
-    "lint": "turbo run lint --continue",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint . --fix",
     "preview": "turbo run preview",
     "typecheck": "turbo run typecheck --continue"
   },
@@ -23,6 +24,7 @@
     "@tsconfig/strictest": "catalog:typescript",
     "lefthook": "catalog:githooks",
     "oxfmt": "catalog:lint",
+    "oxlint": "catalog:lint",
     "turbo": "catalog:tooling",
     "typescript": "catalog:typescript"
   },

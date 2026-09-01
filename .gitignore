@@ -2,6 +2,8 @@ node_modules
 dist/
 .wrangler/
 .turbo/
+packages/*/src/*.d.ts
+packages/*/src/*.d.ts.map
 .env
 .env.*
 !.env.example

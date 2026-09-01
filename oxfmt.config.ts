@@ -1,7 +1,12 @@
 import { defineConfig } from 'oxfmt';
 
 export default defineConfig({
-  ignorePatterns: ['pnpm-lock.yaml', '**/worker-configuration.d.ts'],
+  ignorePatterns: [
+    'pnpm-lock.yaml',
+    '**/worker-configuration.d.ts',
+    'packages/*/src/*.d.ts',
+    'packages/*/src/*.d.ts.map',
+  ],
   jsxSingleQuote: true,
   printWidth: 120,
   singleAttributePerLine: true,

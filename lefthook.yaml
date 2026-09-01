@@ -1,9 +1,26 @@
 pre-commit:
-  commands:
-    format:
-      glob: '**/*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,yaml,yml,md,css,html}'
-      exclude:
-        - 'pnpm-lock.yaml'
+  piped: true
+  jobs:
+    - name: Lint with Oxlint
+      run: |
+        pnpm exec oxlint {staged_files} --fix --no-error-on-unmatched-pattern
+      stage_fixed: true
+
+    - name: Format with Oxfmt
       run: |
         pnpm exec oxfmt {staged_files} --write --no-error-on-unmatched-pattern
       stage_fixed: true
+
+    - group:
+        parallel: true
+        jobs:
+          - name: Typecheck
+            glob:
+              - '**/*.{ts,tsx}'
+            run: |
+              pnpm run typecheck
+
+pre-push:
+  commands:
+    betterleaks:
+      run: betterleaks git . --no-banner -v
