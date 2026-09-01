@@ -1,0 +1,18 @@
+{
+  "name": "@misette/db",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Database client and schema for misette — D1 / Drizzle wrapper",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@misette/workspace": "workspace:*",
+    "typescript": "catalog:typescript"
+  }
+}

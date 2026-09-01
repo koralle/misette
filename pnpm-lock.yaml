@@ -336,6 +336,24 @@ importers:
         specifier: catalog:workers
         version: 4.127.1
 
+  packages/api-contract:
+    devDependencies:
+      '@misette/workspace':
+        specifier: workspace:*
+        version: link:../workspace
+      typescript:
+        specifier: catalog:typescript
+        version: 7.0.2
+
+  packages/db:
+    devDependencies:
+      '@misette/workspace':
+        specifier: workspace:*
+        version: link:../workspace
+      typescript:
+        specifier: catalog:typescript
+        version: 7.0.2
+
   packages/workspace:
     devDependencies:
       '@tsconfig/strictest':
