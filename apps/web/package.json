@@ -1,0 +1,29 @@
+{
+  "name": "@misette/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "cf-typegen": "wrangler types",
+    "deploy": "pnpm run build && wrangler deploy",
+    "dev": "vite",
+    "preview": "pnpm run build && vite preview",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "react": "catalog:frontend",
+    "react-dom": "catalog:frontend"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "catalog:vite",
+    "@types/node": "catalog:typescript",
+    "@types/react": "catalog:frontend",
+    "@types/react-dom": "catalog:frontend",
+    "@vitejs/plugin-react": "catalog:vite",
+    "oxlint": "catalog:lint",
+    "typescript": "catalog:typescript",
+    "vite": "catalog:vite",
+    "wrangler": "catalog:workers"
+  }
+}
