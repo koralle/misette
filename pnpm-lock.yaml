@@ -285,6 +285,9 @@ importers:
       '@cloudflare/vite-plugin':
         specifier: catalog:vite
         version: 1.54.2(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.1))(wrangler@4.127.1)
+      '@misette/workspace':
+        specifier: workspace:*
+        version: link:../../packages/workspace
       '@types/node':
         specifier: catalog:typescript
         version: 24.13.3
@@ -316,12 +319,24 @@ importers:
         specifier: catalog:workers
         version: 4.13.5
     devDependencies:
+      '@misette/workspace':
+        specifier: workspace:*
+        version: link:../../packages/workspace
       typescript:
         specifier: catalog:typescript
         version: 7.0.2
       wrangler:
         specifier: catalog:workers
         version: 4.127.1
+
+  packages/workspace:
+    devDependencies:
+      '@tsconfig/strictest':
+        specifier: catalog:typescript
+        version: 2.0.8
+      typescript:
+        specifier: catalog:typescript
+        version: 7.0.2
 
 packages:
 

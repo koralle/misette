@@ -1,14 +1,6 @@
 {
   "$schema": "https://www.schemastore.org/tsconfig",
-  "extends": "@tsconfig/strictest/tsconfig.json",
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "preserve",
-    "moduleResolution": "bundler",
-    "lib": ["esnext"],
-    "allowImportingTsExtensions": true,
-    "noEmit": true
-  },
+  "extends": "@misette/workspace/typescript/tsconfig.workers.json",
   "include": ["src"],
   "exclude": ["node_modules", "dist", ".wrangler"]
 }

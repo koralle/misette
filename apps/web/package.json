@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "catalog:vite",
+    "@misette/workspace": "workspace:*",
     "@types/node": "catalog:typescript",
     "@types/react": "catalog:frontend",
     "@types/react-dom": "catalog:frontend",

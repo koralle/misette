@@ -12,6 +12,7 @@
     "hono": "catalog:workers"
   },
   "devDependencies": {
+    "@misette/workspace": "workspace:*",
     "typescript": "catalog:typescript",
     "wrangler": "catalog:workers"
   }
