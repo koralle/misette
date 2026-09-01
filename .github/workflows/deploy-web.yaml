@@ -1,20 +1,28 @@
-name: Production Deploy
+name: Deploy Web
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
+      - 'turbo.json'
+      - '.github/workflows/deploy-web.yaml'
+      - '.github/composite-actions/cache-and-install/**'
 
 permissions:
   contents: read
 
 concurrency:
-  group: production-${{ github.workflow }}
+  group: production-web
   cancel-in-progress: true
 
 jobs:
   deploy:
-    name: Deploy Cloudflare Workers production
+    name: Deploy web to Cloudflare Workers
     runs-on: ubuntu-24.04
 
     steps:
@@ -24,15 +32,15 @@ jobs:
       - name: Setup
         uses: ./.github/composite-actions/cache-and-install
 
-      - name: Build
+      - name: Build web
         shell: bash
         run: |
-          pnpm run build
+          pnpm exec turbo run build --filter=@misette/web...
 
-      - name: Deploy production
+      - name: Deploy web
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          pnpm run deploy
+          pnpm --filter @misette/web exec wrangler deploy
