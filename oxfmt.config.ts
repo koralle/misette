@@ -4,6 +4,7 @@ export default defineConfig({
   ignorePatterns: [
     'pnpm-lock.yaml',
     '**/worker-configuration.d.ts',
+    '**/routeTree.gen.ts',
     'packages/*/src/*.d.ts',
     'packages/*/src/*.d.ts.map',
   ],

@@ -8,6 +8,9 @@ allowBuilds:
   workerd: true
 
 catalog:
+  '@tanstack/react-router': 1.170.32
+  '@tanstack/react-router-devtools': 1.167.1
+  '@tanstack/router-plugin': 1.168.35
   js-yaml: 5.4.1
 
 catalogMode: strict
@@ -45,3 +48,5 @@ catalogs:
 saveExact: true
 
 trustPolicy: no-downgrade
+trustPolicyExclude:
+  - semver

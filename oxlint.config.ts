@@ -19,6 +19,7 @@ export default defineConfig({
     'node_modules/**',
     'worker-configuration.d.ts',
     '**/worker-configuration.d.ts',
+    '**/routeTree.gen.ts',
     'packages/*/src/*.d.ts',
     'packages/*/src/*.d.ts.map',
   ],
