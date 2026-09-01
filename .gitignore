@@ -1,1 +1,14 @@
 node_modules
+dist/
+.wrangler/
+.env
+.env.*
+!.env.example
+.dev.vars
+logs/
+*.log
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/launch.json
+!.vscode/*.code-snippets
