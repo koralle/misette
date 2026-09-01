@@ -25,4 +25,3 @@ dist-ssr
 !.dev.vars.example
 .env*
 !.env.example
-worker-configuration.d.ts
