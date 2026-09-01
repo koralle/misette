@@ -1,1 +1,2 @@
-export type Placeholder = Record<string, never>;
+export { createDb, type Database } from './client.ts';
+export * as schema from './schema/index.ts';

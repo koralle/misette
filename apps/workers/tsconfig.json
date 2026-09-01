@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.schemastore.org/tsconfig",
   "extends": "@misette/workspace/typescript/tsconfig.workers.json",
-  "include": ["src"],
+  "include": ["src", "worker-configuration.d.ts"],
   "exclude": ["node_modules", "dist", ".wrangler"]
 }

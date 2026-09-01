@@ -21,7 +21,10 @@ export default defineConfig({
     '**/worker-configuration.d.ts',
     '**/routeTree.gen.ts',
     'packages/*/src/*.d.ts',
+    'packages/*/src/**/*.d.ts',
     'packages/*/src/*.d.ts.map',
+    'packages/db/src/schema/auth.ts',
+    'packages/db/drizzle/**',
   ],
   plugins: ['eslint', 'unicorn', 'react', 'react-perf', 'oxc', 'import', 'jsdoc', 'jsx-a11y', 'node', 'promise'],
   rules: {
@@ -59,11 +62,19 @@ export default defineConfig({
       files: ['apps/web/src/routes/**/*.tsx'],
       rules: {
         'no-use-before-define': 'off',
+        'no-void': 'off',
         'react/no-multi-comp': 'off',
       },
     },
     {
-      files: ['oxfmt.config.ts', 'oxlint.config.ts', 'vite.config.ts', 'vitest.config.ts', 'knip.config.ts'],
+      files: [
+        'oxfmt.config.ts',
+        'oxlint.config.ts',
+        'vite.config.ts',
+        'vitest.config.ts',
+        'knip.config.ts',
+        '**/drizzle.config.ts',
+      ],
       rules: {
         'import/no-default-export': 'off',
       },

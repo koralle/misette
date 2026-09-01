@@ -3,16 +3,23 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "auth:generate": "pnpm dlx auth@1.7.2 generate --config src/auth.config.ts --output ../../packages/db/src/schema/auth.ts --adapter drizzle --dialect sqlite -y",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "db:migrate:local": "wrangler d1 migrations apply misette --local",
+    "db:migrate:remote": "wrangler d1 migrations apply misette --remote",
     "deploy": "wrangler deploy --minify",
     "dev": "wrangler dev",
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "catalog:auth",
+    "@misette/db": "workspace:*",
+    "better-auth": "catalog:auth",
     "hono": "catalog:workers"
   },
   "devDependencies": {
     "@misette/workspace": "workspace:*",
+    "@types/node": "catalog:typescript",
     "typescript": "catalog:typescript",
     "wrangler": "catalog:workers"
   }

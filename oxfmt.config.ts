@@ -7,6 +7,8 @@ export default defineConfig({
     '**/routeTree.gen.ts',
     'packages/*/src/*.d.ts',
     'packages/*/src/*.d.ts.map',
+    'packages/db/drizzle/**',
+    'packages/db/src/schema/auth.ts',
   ],
   jsxSingleQuote: true,
   printWidth: 120,

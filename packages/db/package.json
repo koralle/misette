@@ -5,14 +5,20 @@
   "description": "Database client and schema for misette — D1 / Drizzle wrapper",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts"
   },
   "scripts": {
     "build": "tsc",
+    "generate": "drizzle-kit generate",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "catalog:db"
   },
   "devDependencies": {
     "@misette/workspace": "workspace:*",
+    "drizzle-kit": "catalog:db",
     "typescript": "catalog:typescript"
   }
 }

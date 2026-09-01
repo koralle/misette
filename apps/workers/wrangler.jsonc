@@ -3,36 +3,29 @@
   "name": "workers",
   "main": "src/index.ts",
   "compatibility_date": "2026-09-01",
-  // "compatibility_flags": [
-  //   "nodejs_compat"
-  // ],
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
-  //   }
-  // ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
-  //   }
-  // ],
-  // "ai": {
-  //   "binding": "AI"
-  // },
-  // "observability": {
-  //   "enabled": true,
-  //   "head_sampling_rate": 1
-  // }
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+  "vars": {
+    "BETTER_AUTH_URL": "http://localhost:8787",
+    "WEB_ORIGIN": "http://localhost:5173",
+  },
+  "env": {
+    "production": {
+      "vars": {
+        "BETTER_AUTH_URL": "https://api.misette.koralle-mgmg.com",
+        "WEB_ORIGIN": "https://misette.koralle-mgmg.com",
+      },
+    },
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "misette",
+      "migrations_dir": "../../packages/db/drizzle",
+      "database_id": "b5517e3b-e910-4a9b-a3b0-efaa8fb64df5",
+    },
+  ],
 }
