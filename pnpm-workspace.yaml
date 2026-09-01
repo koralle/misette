@@ -14,6 +14,9 @@ catalogs:
     lefthook: 2.1.12
   lint:
     oxfmt: 0.65.0
+  typescript:
+    '@tsconfig/strictest': 2.0.8
+    typescript: 7.0.2
   workers:
     hono: 4.13.5
     wrangler: 4.127.1

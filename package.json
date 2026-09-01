@@ -12,8 +12,10 @@
     "format:check": "oxfmt . --check"
   },
   "devDependencies": {
+    "@tsconfig/strictest": "catalog:typescript",
     "lefthook": "catalog:githooks",
-    "oxfmt": "catalog:lint"
+    "oxfmt": "catalog:lint",
+    "typescript": "catalog:typescript"
   },
   "devEngines": {
     "packageManager": {
