@@ -2,10 +2,10 @@
   "name": "@misette/db",
   "version": "0.0.0",
   "private": true,
-  "description": "Database client and schema for misette — D1 / Drizzle wrapper",
+  "description": "Drizzle schema and migrations for misette",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
+    ".": "./src/schema/index.ts",
     "./schema": "./src/schema/index.ts"
   },
   "scripts": {

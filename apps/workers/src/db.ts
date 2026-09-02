@@ -1,8 +1,8 @@
 import { drizzle } from 'drizzle-orm/d1';
 
-import * as schema from './schema/index.ts';
+import * as schema from '@misette/db/schema';
 
-export function createDb(d1: Parameters<typeof drizzle>[0]) {
+export function createDb(d1: D1Database) {
   return drizzle(d1, { schema });
 }
 

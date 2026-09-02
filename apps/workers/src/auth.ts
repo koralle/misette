@@ -2,9 +2,10 @@ import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { betterAuth } from 'better-auth/minimal';
 import { waitUntil } from 'cloudflare:workers';
 
-import { createDb, schema } from '@misette/db';
+import * as schema from '@misette/db/schema';
 
 import { authOptions } from './auth-options.ts';
+import { createDb } from './db.ts';
 
 export function createAuth(env: CloudflareBindings) {
   return betterAuth({
