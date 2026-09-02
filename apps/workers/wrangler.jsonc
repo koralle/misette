@@ -9,15 +9,37 @@
     "head_sampling_rate": 1,
   },
   "vars": {
-    "BETTER_AUTH_URL": "http://localhost:8787",
+    "BETTER_AUTH_URL": "http://localhost:5173",
     "WEB_ORIGIN": "http://localhost:5173",
   },
   "env": {
+    "direct": {
+      "vars": {
+        "BETTER_AUTH_URL": "http://localhost:8787",
+        "WEB_ORIGIN": "http://localhost:5173",
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "misette",
+          "migrations_dir": "../../packages/db/drizzle",
+          "database_id": "b5517e3b-e910-4a9b-a3b0-efaa8fb64df5",
+        },
+      ],
+    },
     "production": {
       "vars": {
-        "BETTER_AUTH_URL": "https://api.misette.koralle-mgmg.com",
+        "BETTER_AUTH_URL": "https://misette.koralle-mgmg.com",
         "WEB_ORIGIN": "https://misette.koralle-mgmg.com",
       },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "misette",
+          "migrations_dir": "../../packages/db/drizzle",
+          "database_id": "b5517e3b-e910-4a9b-a3b0-efaa8fb64df5",
+        },
+      ],
     },
   },
   "d1_databases": [

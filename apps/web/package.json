@@ -27,6 +27,7 @@
     "@types/react-dom": "catalog:frontend",
     "@vitejs/plugin-react": "catalog:vite",
     "oxlint": "catalog:lint",
+    "playwright": "catalog:testing",
     "typescript": "catalog:typescript",
     "vite": "catalog:vite",
     "wrangler": "catalog:workers"

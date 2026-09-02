@@ -5,12 +5,19 @@ import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    port: 5173,
+    strictPort: true,
+  },
   plugins: [
     tanstackRouter({
       target: 'react',
       autoCodeSplitting: true,
     }),
     react(),
-    cloudflare(),
+    cloudflare({
+      configPath: './wrangler.jsonc',
+      auxiliaryWorkers: [{ configPath: '../workers/wrangler.jsonc' }],
+    }),
   ],
 });

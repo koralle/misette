@@ -51,6 +51,8 @@ catalogs:
   workers:
     hono: 4.13.5
     wrangler: 4.127.1
+  testing:
+    playwright: 1.62.1
 
 saveExact: true
 

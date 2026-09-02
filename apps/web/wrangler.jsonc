@@ -36,5 +36,17 @@
    * Service Bindings (communicate between multiple Workers)
    * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
    */
-  // "services": [  {   "binding": "MY_SERVICE",   "service": "my-service"  } ]
+  "services": [{ "binding": "WORKERS", "service": "workers" }],
+  "vars": {
+    "BETTER_AUTH_URL": "http://localhost:5173",
+    "WEB_ORIGIN": "http://localhost:5173",
+  },
+  "env": {
+    "production": {
+      "vars": {
+        "BETTER_AUTH_URL": "https://misette.koralle-mgmg.com",
+        "WEB_ORIGIN": "https://misette.koralle-mgmg.com",
+      },
+    },
+  },
 }

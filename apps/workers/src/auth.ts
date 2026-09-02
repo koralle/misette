@@ -8,6 +8,9 @@ import { authOptions } from './auth-options.ts';
 import { createDb } from './db.ts';
 
 export function createAuth(env: CloudflareBindings) {
+  if (!env.DB) {
+    throw new Error('D1 database binding DB not configured');
+  }
   return betterAuth({
     ...authOptions,
     advanced: {
