@@ -1,0 +1,45 @@
+---
+description: pstack economical model routing for Cursor Pro+
+alwaysApply: true
+---
+
+# Parent model:
+#   Cursor Grok 4.6 Medium
+#   Standard speed / Fast OFF
+#
+# Policy:
+# - High-volume / parallel / mechanical work -> GPT-5.6 Luna High
+# - Hard but bounded worker tasks -> GPT-5.6 Luna Max
+# - Judgment / synthesis / ambiguous reasoning -> parent Grok 4.6 Medium
+# - Expensive panels -> max 2 agents by default
+# - Escalate Grok effort manually only for genuinely hard tasks
+# - No Fast variants
+
+feature, refactoring: gpt-5.6-luna-high
+
+bug-fix: inherit-parent
+perf-issue: inherit-parent
+
+hillclimb: gpt-5.6-luna-high
+
+judgment and prose: inherit-parent
+hardest tasks: inherit-parent
+
+how explorer: gpt-5.6-luna-high
+how explainer: inherit-parent
+how critics: inherit-parent, gpt-5.6-luna-max
+
+why investigators: gpt-5.6-luna-high
+why synthesizer: inherit-parent
+
+reflect tooling: gpt-5.6-luna-high
+reflect judgment, divergent, synthesizer: inherit-parent
+
+arena runners: inherit-parent, gpt-5.6-luna-max
+arena cross-judge pool: gpt-5.6-luna-max, inherit-parent
+
+swarm workers: gpt-5.6-luna-high
+
+architect runners: inherit-parent, gpt-5.6-luna-max
+
+interrogate reviewers: inherit-parent, gpt-5.6-luna-max
