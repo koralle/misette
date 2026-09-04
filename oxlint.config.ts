@@ -93,5 +93,11 @@ export default defineConfig({
         'unicorn/no-process-exit': 'off',
       },
     },
+    {
+      files: ['packages/db/src/schema/**/*.ts'],
+      rules: {
+        'import/no-cycle': 'off',
+      },
+    },
   ],
 });
