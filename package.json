@@ -13,7 +13,7 @@
     "check": "ultracite check --type-aware && turbo run typecheck --continue",
     "deploy": "turbo run deploy",
     "dev": "turbo run dev",
-    "fix": "ultracite fix --type-aware",
+    "fix": "ultracite fix --type-aware --no-error-on-unmatched-pattern",
     "preview": "turbo run preview",
     "typecheck": "turbo run typecheck --continue"
   },

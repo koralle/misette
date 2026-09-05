@@ -1,5 +1,32 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "formatter": {
+    "oxfmt": {
+      "disabled": true,
+    },
+    "ultracite": {
+      "command": ["pnpm", "run", "fix", "--", "$FILE"],
+      "extensions": [
+        ".js",
+        ".cjs",
+        ".mjs",
+        ".jsx",
+        ".ts",
+        ".cts",
+        ".mts",
+        ".tsx",
+        ".json",
+        ".jsonc",
+        ".css",
+        ".scss",
+        ".md",
+        ".mdx",
+        ".yaml",
+        ".yml",
+        ".html",
+      ],
+    },
+  },
   "mcp": {
     "better-auth": {
       "type": "remote",
