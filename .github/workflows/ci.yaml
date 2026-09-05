@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  lint:
+  check:
     runs-on: ubuntu-24.04
 
     steps:
@@ -19,40 +19,10 @@ jobs:
       - name: Setup
         uses: ./.github/composite-actions/cache-and-install
 
-      - name: Lint with Oxlint
+      - name: Check
         shell: bash
         run: |
-          pnpm exec oxlint . --format=github
-
-  format-check:
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Setup
-        uses: ./.github/composite-actions/cache-and-install
-
-      - name: Format check with Oxfmt
-        shell: bash
-        run: |
-          pnpm run format:check
-
-  typecheck:
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Setup
-        uses: ./.github/composite-actions/cache-and-install
-
-      - name: Typecheck
-        shell: bash
-        run: |
-          pnpm run typecheck
+          pnpm run check
 
   build:
     runs-on: ubuntu-24.04

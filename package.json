@@ -10,13 +10,10 @@
   "scripts": {
     "build": "turbo run build",
     "cf-typegen": "turbo run cf-typegen",
-    "check": "turbo run check --continue",
+    "check": "ultracite check --type-aware && turbo run typecheck --continue",
     "deploy": "turbo run deploy",
     "dev": "turbo run dev",
-    "format": "oxfmt .",
-    "format:check": "oxfmt . --check",
-    "lint": "oxlint .",
-    "lint:fix": "oxlint . --fix",
+    "fix": "ultracite fix --type-aware",
     "preview": "turbo run preview",
     "typecheck": "turbo run typecheck --continue"
   },
@@ -25,6 +22,7 @@
     "lefthook": "catalog:githooks",
     "oxfmt": "catalog:lint",
     "oxlint": "catalog:lint",
+    "oxlint-tsgolint": "catalog:lint",
     "turbo": "catalog:tooling",
     "typescript": "catalog:typescript",
     "ultracite": "catalog:lint"

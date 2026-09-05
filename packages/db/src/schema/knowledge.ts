@@ -1,92 +1,111 @@
-import { desc, relations, sql } from 'drizzle-orm';
-import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { desc, relations, sql } from "drizzle-orm";
+import {
+  index,
+  integer,
+  primaryKey,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
-import { user } from './auth.ts';
-import { recipe, recipeStep } from './recipe.ts';
+import { user } from "./auth.ts";
+import { recipe, recipeStep } from "./recipe.ts";
 
 const nowMs = sql`(cast(unixepoch('subsecond') * 1000 as integer))`;
 
 export const cookingKnowledge = sqliteTable(
-  'cooking_knowledge',
+  "cooking_knowledge",
   {
-    id: text('id').primaryKey(),
-    title: text('title').notNull(),
-    body: text('body').notNull(),
-    createdByUserId: text('created_by_user_id')
+    body: text("body").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(nowMs)
+      .notNull(),
+    createdByUserId: text("created_by_user_id")
       .notNull()
-      .references(() => user.id, { onDelete: 'restrict' }),
-    createdAt: integer('created_at', { mode: 'timestamp_ms' }).default(nowMs).notNull(),
-    updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+      .references(() => user.id, { onDelete: "restrict" }),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(nowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    deletedAt: integer('deleted_at', { mode: 'timestamp_ms' }),
   },
   (table) => [
-    index('cooking_knowledge_createdByUserId_updatedAt_idx').on(table.createdByUserId, desc(table.updatedAt)),
-  ],
+    index("cooking_knowledge_createdByUserId_updatedAt_idx").on(
+      table.createdByUserId,
+      desc(table.updatedAt)
+    ),
+  ]
 );
 
 export const recipeKnowledge = sqliteTable(
-  'recipe_knowledge',
+  "recipe_knowledge",
   {
-    recipeId: text('recipe_id')
+    cookingKnowledgeId: text("cooking_knowledge_id")
       .notNull()
-      .references(() => recipe.id, { onDelete: 'restrict' }),
-    cookingKnowledgeId: text('cooking_knowledge_id')
+      .references(() => cookingKnowledge.id, { onDelete: "restrict" }),
+    recipeId: text("recipe_id")
       .notNull()
-      .references(() => cookingKnowledge.id, { onDelete: 'restrict' }),
+      .references(() => recipe.id, { onDelete: "restrict" }),
   },
   (table) => [
     primaryKey({ columns: [table.recipeId, table.cookingKnowledgeId] }),
-    index('recipe_knowledge_cookingKnowledgeId_idx').on(table.cookingKnowledgeId),
-  ],
+    index("recipe_knowledge_cookingKnowledgeId_idx").on(
+      table.cookingKnowledgeId
+    ),
+  ]
 );
 
 export const stepKnowledge = sqliteTable(
-  'step_knowledge',
+  "step_knowledge",
   {
-    recipeStepId: text('recipe_step_id')
+    cookingKnowledgeId: text("cooking_knowledge_id")
       .notNull()
-      .references(() => recipeStep.id, { onDelete: 'restrict' }),
-    cookingKnowledgeId: text('cooking_knowledge_id')
+      .references(() => cookingKnowledge.id, { onDelete: "restrict" }),
+    recipeStepId: text("recipe_step_id")
       .notNull()
-      .references(() => cookingKnowledge.id, { onDelete: 'restrict' }),
+      .references(() => recipeStep.id, { onDelete: "restrict" }),
   },
   (table) => [
     primaryKey({ columns: [table.recipeStepId, table.cookingKnowledgeId] }),
-    index('step_knowledge_cookingKnowledgeId_idx').on(table.cookingKnowledgeId),
-  ],
+    index("step_knowledge_cookingKnowledgeId_idx").on(table.cookingKnowledgeId),
+  ]
 );
 
-export const cookingKnowledgeRelations = relations(cookingKnowledge, ({ one, many }) => ({
-  createdBy: one(user, {
-    fields: [cookingKnowledge.createdByUserId],
-    references: [user.id],
-  }),
-  recipeLinks: many(recipeKnowledge),
-  stepLinks: many(stepKnowledge),
-}));
+export const cookingKnowledgeRelations = relations(
+  cookingKnowledge,
+  ({ one, many }) => ({
+    createdBy: one(user, {
+      fields: [cookingKnowledge.createdByUserId],
+      references: [user.id],
+    }),
+    recipeLinks: many(recipeKnowledge),
+    stepLinks: many(stepKnowledge),
+  })
+);
 
-export const recipeKnowledgeRelations = relations(recipeKnowledge, ({ one }) => ({
-  recipe: one(recipe, {
-    fields: [recipeKnowledge.recipeId],
-    references: [recipe.id],
-  }),
-  cookingKnowledge: one(cookingKnowledge, {
-    fields: [recipeKnowledge.cookingKnowledgeId],
-    references: [cookingKnowledge.id],
-  }),
-}));
+export const recipeKnowledgeRelations = relations(
+  recipeKnowledge,
+  ({ one }) => ({
+    cookingKnowledge: one(cookingKnowledge, {
+      fields: [recipeKnowledge.cookingKnowledgeId],
+      references: [cookingKnowledge.id],
+    }),
+    recipe: one(recipe, {
+      fields: [recipeKnowledge.recipeId],
+      references: [recipe.id],
+    }),
+  })
+);
 
 export const stepKnowledgeRelations = relations(stepKnowledge, ({ one }) => ({
-  recipeStep: one(recipeStep, {
-    fields: [stepKnowledge.recipeStepId],
-    references: [recipeStep.id],
-  }),
   cookingKnowledge: one(cookingKnowledge, {
     fields: [stepKnowledge.cookingKnowledgeId],
     references: [cookingKnowledge.id],
+  }),
+  recipeStep: one(recipeStep, {
+    fields: [stepKnowledge.recipeStepId],
+    references: [recipeStep.id],
   }),
 }));
 
