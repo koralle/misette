@@ -8,7 +8,6 @@
     "db:clean:local": "rimraf .wrangler/state && rimraf .wrangler/local && rimraf ../web/.wrangler/state",
     "db:migrate:local": "wrangler d1 migrations apply misette --local --persist-to .wrangler/state && wrangler d1 migrations apply misette --local --persist-to .wrangler/local && wrangler d1 migrations apply misette --local --persist-to ../web/.wrangler/state",
     "db:migrate:remote": "wrangler d1 migrations apply misette --remote",
-    "db:prove:local": "pnpm db:reset:local && bash scripts/prove-constraints.sh",
     "db:reset:local": "pnpm db:clean:local && pnpm db:migrate:local",
     "deploy": "wrangler deploy --minify",
     "dev": "echo 'Use pnpm --filter @misette/web dev (binding) or pnpm --filter @misette/workers dev:direct'",
