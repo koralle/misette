@@ -26,19 +26,19 @@ const nowMs = sql`(cast(unixepoch('subsecond') * 1000 as integer))`;
 export const recipe = sqliteTable(
   "recipe",
   {
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .default(nowMs)
-      .notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
     id: text("id").primaryKey(),
     ownerUserId: text("owner_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "restrict" }),
+    visibility: text("visibility", { enum: recipeVisibilities }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(nowMs)
+      .notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(nowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    visibility: text("visibility", { enum: recipeVisibilities }).notNull(),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
   },
   (table) => [
     index("recipe_ownerUserId_idx").on(table.ownerUserId),
@@ -49,16 +49,16 @@ export const recipe = sqliteTable(
 export const recipeShare = sqliteTable(
   "recipe_share",
   {
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .default(nowMs)
-      .notNull(),
-    permission: text("permission", { enum: recipeSharePermissions }).notNull(),
     recipeId: text("recipe_id")
       .notNull()
       .references(() => recipe.id, { onDelete: "restrict" }),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    permission: text("permission", { enum: recipeSharePermissions }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(nowMs)
+      .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.recipeId, table.userId] }),
@@ -75,15 +75,15 @@ export const recipeSource = sqliteTable(
   "recipe_source",
   {
     id: text("id").primaryKey(),
-    importedAt: integer("imported_at", { mode: "timestamp_ms" })
-      .default(nowMs)
-      .notNull(),
     recipeId: text("recipe_id")
       .notNull()
       .references(() => recipe.id, { onDelete: "restrict" }),
-    sourceName: text("source_name"),
     sourceType: text("source_type", { enum: recipeSourceTypes }).notNull(),
+    sourceName: text("source_name"),
     sourceUrl: text("source_url"),
+    importedAt: integer("imported_at", { mode: "timestamp_ms" })
+      .default(nowMs)
+      .notNull(),
   },
   (table) => [
     index("recipe_source_recipeId_idx").on(table.recipeId),
@@ -98,22 +98,22 @@ export const recipeSource = sqliteTable(
 export const recipeRevision = sqliteTable(
   "recipe_revision",
   {
-    changeNote: text("change_note"),
-    cookingTimeMinutes: integer("cooking_time_minutes"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .default(nowMs)
-      .notNull(),
-    createdByUserId: text("created_by_user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "restrict" }),
-    description: text("description"),
     id: text("id").primaryKey(),
     recipeId: text("recipe_id")
       .notNull()
       .references(() => recipe.id, { onDelete: "restrict" }),
     revisionNo: integer("revision_no").notNull(),
-    servingsText: text("servings_text"),
     title: text("title").notNull(),
+    description: text("description"),
+    servingsText: text("servings_text"),
+    cookingTimeMinutes: integer("cooking_time_minutes"),
+    changeNote: text("change_note"),
+    createdByUserId: text("created_by_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(nowMs)
+      .notNull(),
   },
   (table) => [
     uniqueIndex("recipe_revision_recipeId_revisionNo_uidx").on(
@@ -132,18 +132,18 @@ export const recipeRevision = sqliteTable(
 export const recipeIngredient = sqliteTable(
   "recipe_ingredient",
   {
-    displayName: text("display_name").notNull(),
     id: text("id").primaryKey(),
-    ingredientId: text("ingredient_id")
-      .notNull()
-      .references(() => ingredient.id, { onDelete: "restrict" }),
-    note: text("note"),
-    quantityText: text("quantity_text"),
-    quantityUnit: text("quantity_unit"),
-    quantityValue: real("quantity_value"),
     recipeRevisionId: text("recipe_revision_id")
       .notNull()
       .references(() => recipeRevision.id, { onDelete: "restrict" }),
+    ingredientId: text("ingredient_id")
+      .notNull()
+      .references(() => ingredient.id, { onDelete: "restrict" }),
+    displayName: text("display_name").notNull(),
+    quantityValue: real("quantity_value"),
+    quantityUnit: text("quantity_unit"),
+    quantityText: text("quantity_text"),
+    note: text("note"),
     sortOrder: integer("sort_order").notNull(),
   },
   (table) => [
@@ -159,12 +159,12 @@ export const recipeIngredient = sqliteTable(
 export const recipeStep = sqliteTable(
   "recipe_step",
   {
-    body: text("body").notNull(),
     id: text("id").primaryKey(),
     recipeRevisionId: text("recipe_revision_id")
       .notNull()
       .references(() => recipeRevision.id, { onDelete: "restrict" }),
     sortOrder: integer("sort_order").notNull(),
+    body: text("body").notNull(),
   },
   (table) => [
     uniqueIndex("recipe_step_recipeRevisionId_sortOrder_uidx").on(
@@ -180,14 +180,14 @@ export const recipeStep = sqliteTable(
 );
 
 export const recipeRelations = relations(recipe, ({ one, many }) => ({
-  knowledgeLinks: many(recipeKnowledge),
   owner: one(user, {
     fields: [recipe.ownerUserId],
     references: [user.id],
   }),
-  revisions: many(recipeRevision),
   shares: many(recipeShare),
   sources: many(recipeSource),
+  revisions: many(recipeRevision),
+  knowledgeLinks: many(recipeKnowledge),
 }));
 
 export const recipeShareRelations = relations(recipeShare, ({ one }) => ({
@@ -211,41 +211,41 @@ export const recipeSourceRelations = relations(recipeSource, ({ one }) => ({
 export const recipeRevisionRelations = relations(
   recipeRevision,
   ({ one, many }) => ({
-    cookingAttempts: many(cookingAttempt),
+    recipe: one(recipe, {
+      fields: [recipeRevision.recipeId],
+      references: [recipe.id],
+    }),
     createdBy: one(user, {
       fields: [recipeRevision.createdByUserId],
       references: [user.id],
     }),
     ingredients: many(recipeIngredient),
-    recipe: one(recipe, {
-      fields: [recipeRevision.recipeId],
-      references: [recipe.id],
-    }),
     steps: many(recipeStep),
+    cookingAttempts: many(cookingAttempt),
   })
 );
 
 export const recipeIngredientRelations = relations(
   recipeIngredient,
   ({ one }) => ({
-    ingredient: one(ingredient, {
-      fields: [recipeIngredient.ingredientId],
-      references: [ingredient.id],
-    }),
     revision: one(recipeRevision, {
       fields: [recipeIngredient.recipeRevisionId],
       references: [recipeRevision.id],
+    }),
+    ingredient: one(ingredient, {
+      fields: [recipeIngredient.ingredientId],
+      references: [ingredient.id],
     }),
   })
 );
 
 export const recipeStepRelations = relations(recipeStep, ({ one, many }) => ({
-  cookingAttemptStepNotes: many(cookingAttemptStepNote),
-  knowledgeLinks: many(stepKnowledge),
   revision: one(recipeRevision, {
     fields: [recipeStep.recipeRevisionId],
     references: [recipeRevision.id],
   }),
+  knowledgeLinks: many(stepKnowledge),
+  cookingAttemptStepNotes: many(cookingAttemptStepNote),
 }));
 
 export type Recipe = typeof recipe.$inferSelect;

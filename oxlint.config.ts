@@ -16,6 +16,7 @@ export default defineConfig({
       files: ["packages/db/src/schema/**/*.ts"],
       rules: {
         "import/no-cycle": "off",
+        "sort-keys": "off",
       },
     },
     {

@@ -15,20 +15,20 @@ const nowMs = sql`(cast(unixepoch('subsecond') * 1000 as integer))`;
 export const cookingKnowledge = sqliteTable(
   "cooking_knowledge",
   {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
     body: text("body").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .default(nowMs)
-      .notNull(),
     createdByUserId: text("created_by_user_id")
       .notNull()
       .references(() => user.id, { onDelete: "restrict" }),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
-    id: text("id").primaryKey(),
-    title: text("title").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(nowMs)
+      .notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(nowMs)
       .$onUpdate(() => new Date())
       .notNull(),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
   },
   (table) => [
     index("cooking_knowledge_createdByUserId_updatedAt_idx").on(
@@ -41,12 +41,12 @@ export const cookingKnowledge = sqliteTable(
 export const recipeKnowledge = sqliteTable(
   "recipe_knowledge",
   {
-    cookingKnowledgeId: text("cooking_knowledge_id")
-      .notNull()
-      .references(() => cookingKnowledge.id, { onDelete: "restrict" }),
     recipeId: text("recipe_id")
       .notNull()
       .references(() => recipe.id, { onDelete: "restrict" }),
+    cookingKnowledgeId: text("cooking_knowledge_id")
+      .notNull()
+      .references(() => cookingKnowledge.id, { onDelete: "restrict" }),
   },
   (table) => [
     primaryKey({ columns: [table.recipeId, table.cookingKnowledgeId] }),
@@ -59,12 +59,12 @@ export const recipeKnowledge = sqliteTable(
 export const stepKnowledge = sqliteTable(
   "step_knowledge",
   {
-    cookingKnowledgeId: text("cooking_knowledge_id")
-      .notNull()
-      .references(() => cookingKnowledge.id, { onDelete: "restrict" }),
     recipeStepId: text("recipe_step_id")
       .notNull()
       .references(() => recipeStep.id, { onDelete: "restrict" }),
+    cookingKnowledgeId: text("cooking_knowledge_id")
+      .notNull()
+      .references(() => cookingKnowledge.id, { onDelete: "restrict" }),
   },
   (table) => [
     primaryKey({ columns: [table.recipeStepId, table.cookingKnowledgeId] }),
@@ -87,25 +87,25 @@ export const cookingKnowledgeRelations = relations(
 export const recipeKnowledgeRelations = relations(
   recipeKnowledge,
   ({ one }) => ({
-    cookingKnowledge: one(cookingKnowledge, {
-      fields: [recipeKnowledge.cookingKnowledgeId],
-      references: [cookingKnowledge.id],
-    }),
     recipe: one(recipe, {
       fields: [recipeKnowledge.recipeId],
       references: [recipe.id],
+    }),
+    cookingKnowledge: one(cookingKnowledge, {
+      fields: [recipeKnowledge.cookingKnowledgeId],
+      references: [cookingKnowledge.id],
     }),
   })
 );
 
 export const stepKnowledgeRelations = relations(stepKnowledge, ({ one }) => ({
-  cookingKnowledge: one(cookingKnowledge, {
-    fields: [stepKnowledge.cookingKnowledgeId],
-    references: [cookingKnowledge.id],
-  }),
   recipeStep: one(recipeStep, {
     fields: [stepKnowledge.recipeStepId],
     references: [recipeStep.id],
+  }),
+  cookingKnowledge: one(cookingKnowledge, {
+    fields: [stepKnowledge.cookingKnowledgeId],
+    references: [cookingKnowledge.id],
   }),
 }));
 
