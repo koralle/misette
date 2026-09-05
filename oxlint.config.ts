@@ -1,102 +1,28 @@
-import { defineConfig } from 'oxlint';
+import { defineConfig } from "oxlint";
+import antiSlop from "ultracite/oxlint/anti-slop";
+import core from "ultracite/oxlint/core";
+import react from "ultracite/oxlint/react";
+import tanstack from "ultracite/oxlint/tanstack";
 
 export default defineConfig({
-  categories: {
-    correctness: 'error',
-    nursery: 'off',
-    pedantic: 'off',
-    perf: 'warn',
-    restriction: 'warn',
-    style: 'warn',
-    suspicious: 'error',
-  },
+  extends: [core, react, tanstack, antiSlop],
   ignorePatterns: [
-    'dist/**',
-    '**/dist/**',
-    '.turbo/**',
-    '.wrangler/**',
-    '**/.wrangler/**',
-    'node_modules/**',
-    'worker-configuration.d.ts',
-    '**/worker-configuration.d.ts',
-    '**/routeTree.gen.ts',
-    'packages/*/src/*.d.ts',
-    'packages/*/src/**/*.d.ts',
-    'packages/*/src/*.d.ts.map',
-    'packages/db/src/schema/auth.ts',
-    'packages/db/drizzle/**',
+    ...core.ignorePatterns,
+    "packages/db/drizzle/**",
+    "packages/db/src/schema/auth.ts",
   ],
-  plugins: ['eslint', 'unicorn', 'react', 'react-perf', 'oxc', 'import', 'jsdoc', 'jsx-a11y', 'node', 'promise'],
-  rules: {
-    'react/react-in-jsx-scope': 'off',
-    'react-perf/jsx-no-new-array-as-prop': 'off',
-    'react-perf/jsx-no-new-function-as-prop': 'off',
-    'import/no-unassigned-import': ['error', { allow: ['**/*.css'] }],
-    'react/jsx-filename-extension': 'off',
-    'react/jsx-max-depth': 'off',
-    'react/jsx-no-literals': 'off',
-    'react/only-export-components': 'off',
-    'react/forbid-component-props': 'off',
-    'oxc/no-async-await': 'off',
-    'oxc/no-optional-chaining': 'off',
-    'oxc/no-rest-spread-properties': 'off',
-    'unicorn/no-null': 'off',
-    'no-ternary': 'off',
-    'no-undefined': 'off',
-    'import/exports-last': 'off',
-    'import/no-relative-parent-imports': 'off',
-    'one-var': 'off',
-    'func-style': 'off',
-    'id-length': 'off',
-    'no-duplicate-imports': ['error', { allowSeparateTypeImports: true }],
-    'no-magic-numbers': 'off',
-    'sort-imports': 'off',
-    'sort-keys': 'off',
-    'import/group-exports': 'off',
-    'import/no-named-export': 'off',
-    'import/no-namespace': 'off',
-    'import/prefer-default-export': 'off',
-  },
   overrides: [
     {
-      files: ['apps/web/src/routes/**/*.tsx'],
+      files: ["packages/db/src/schema/**/*.ts"],
       rules: {
-        'no-use-before-define': 'off',
-        'no-void': 'off',
-        'react/no-multi-comp': 'off',
+        "import/no-cycle": "off",
+        "sort-keys": "off",
       },
     },
     {
-      files: [
-        'oxfmt.config.ts',
-        'oxlint.config.ts',
-        'vite.config.ts',
-        'vitest.config.ts',
-        'knip.config.ts',
-        '**/drizzle.config.ts',
-      ],
+      files: ["packages/db/src/schema/index.ts"],
       rules: {
-        'import/no-default-export': 'off',
-      },
-    },
-    {
-      files: ['apps/*/vite.config.ts', 'apps/*/vitest.config.ts'],
-      rules: {
-        'import/no-default-export': 'off',
-        'node/no-process-env': 'off',
-      },
-    },
-    {
-      files: ['scripts/**/*.ts'],
-      rules: {
-        'no-console': 'off',
-        'unicorn/no-process-exit': 'off',
-      },
-    },
-    {
-      files: ['packages/db/src/schema/**/*.ts'],
-      rules: {
-        'import/no-cycle': 'off',
+        "oxc/no-barrel-file": "off",
       },
     },
   ],

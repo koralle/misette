@@ -53,7 +53,15 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".wrangler/**", "node_modules/.tmp/**"],
-      "inputs": ["src/**", "public/**", "index.html", "vite.config.*", "tsconfig.*", "wrangler.*", "worker/**"]
+      "inputs": [
+        "src/**",
+        "public/**",
+        "index.html",
+        "vite.config.*",
+        "tsconfig.*",
+        "wrangler.*",
+        "worker/**"
+      ]
     },
     "typecheck": {
       "dependsOn": ["^build"],

@@ -41,8 +41,8 @@ Edit `pnpm-workspace.yaml` :
 ```yaml
 catalogs:
   frontend:
-    '@types/react': 19.2.17
-    '@types/react-dom': 19.2.3
+    "@types/react": 19.2.17
+    "@types/react-dom": 19.2.3
     react: 19.2.8
     react-dom: 19.2.8
   githooks:
@@ -53,12 +53,12 @@ catalogs:
   tooling:
     turbo: 2.10.12
   typescript:
-    '@tsconfig/strictest': 2.0.8
-    '@types/node': 24.13.3
+    "@tsconfig/strictest": 2.0.8
+    "@types/node": 24.13.3
     typescript: 7.0.2
   vite:
-    '@cloudflare/vite-plugin': 1.54.2
-    '@vitejs/plugin-react': 6.0.4
+    "@cloudflare/vite-plugin": 1.54.2
+    "@vitejs/plugin-react": 6.0.4
     vite: 8.2.0
   workers:
     hono: 4.13.5
@@ -176,7 +176,15 @@ Write `turbo.json`:
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".wrangler/**"],
-      "inputs": ["src/**", "public/**", "index.html", "vite.config.*", "tsconfig.*", "wrangler.*", "worker/**"]
+      "inputs": [
+        "src/**",
+        "public/**",
+        "index.html",
+        "vite.config.*",
+        "tsconfig.*",
+        "wrangler.*",
+        "worker/**"
+      ]
     },
     "typecheck": {
       "dependsOn": ["^build"],

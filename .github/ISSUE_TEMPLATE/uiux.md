@@ -1,9 +1,9 @@
 ---
 name: UI/UX改善
 about: 既存機能の見た目・操作感・情報設計・モーションを改善する
-title: ''
-labels: 'uiux'
-assignees: ''
+title: ""
+labels: "uiux"
+assignees: ""
 ---
 
 <!--
