@@ -26,7 +26,8 @@
     "oxfmt": "catalog:lint",
     "oxlint": "catalog:lint",
     "turbo": "catalog:tooling",
-    "typescript": "catalog:typescript"
+    "typescript": "catalog:typescript",
+    "ultracite": "catalog:lint"
   },
   "devEngines": {
     "packageManager": {
