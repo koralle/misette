@@ -10,7 +10,7 @@
   "scripts": {
     "build": "turbo run build",
     "cf-typegen": "turbo run cf-typegen",
-    "check": "ultracite check --type-aware && turbo run typecheck --continue",
+    "check": "pnpm --filter @misette/web panda && ultracite check --type-aware && turbo run typecheck --continue",
     "deploy": "turbo run deploy",
     "dev": "turbo run dev",
     "fix": "ultracite fix --type-aware --no-error-on-unmatched-pattern",
