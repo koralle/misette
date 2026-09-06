@@ -60,7 +60,7 @@ catalogs:
     "@types/node": 24.13.3
     typescript: 7.0.2
   vite:
-    "@cloudflare/vite-plugin": 1.54.3
+    "@cloudflare/vite-plugin": 1.54.4
     "@pandacss/dev": 1.12.1
     "@vitejs/plugin-react": 6.1.1
     postcss: 8.5.28
@@ -71,7 +71,7 @@ catalogs:
     "@logtape/hono": 2.3.3
     "@logtape/logtape": 2.3.3
     hono: 4.13.5
-    wrangler: 4.128.0
+    wrangler: 4.129.0
   testing:
     "@axe-core/playwright": 4.13.0
     "@lhci/cli": 0.15.1
