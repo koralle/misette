@@ -228,24 +228,21 @@ export const RecipeForm = ({
       ) : null}
 
       <TextField
+        {...getInputProps(fields.title, { type: "text" })}
         className={fieldClass}
         isInvalid={Boolean(fields.title.errors?.length)}
       >
         <Label>タイトル</Label>
-        <Input
-          {...getInputProps(fields.title, { type: "text" })}
-          className={inputClass}
-        />
+        <Input className={inputClass} />
         <FieldMessages errors={fields.title.errors} id={fields.title.errorId} />
       </TextField>
 
-      <TextField className={fieldClass}>
+      <TextField
+        {...getTextareaProps(fields.description)}
+        className={fieldClass}
+      >
         <Label>説明</Label>
-        <TextArea
-          {...getTextareaProps(fields.description)}
-          className={inputClass}
-          rows={4}
-        />
+        <TextArea className={inputClass} rows={4} />
       </TextField>
 
       <div
@@ -255,20 +252,19 @@ export const RecipeForm = ({
           gridTemplateColumns: { base: "1fr", md: "1fr 1fr" },
         })}
       >
-        <TextField className={fieldClass}>
+        <TextField
+          {...getInputProps(fields.servingsText, { type: "text" })}
+          className={fieldClass}
+        >
           <Label>分量</Label>
-          <Input
-            {...getInputProps(fields.servingsText, { type: "text" })}
-            className={inputClass}
-          />
+          <Input className={inputClass} />
         </TextField>
-        <TextField className={fieldClass}>
+        <TextField
+          {...getInputProps(fields.cookingTimeMinutes, { type: "number" })}
+          className={fieldClass}
+        >
           <Label>調理時間（分）</Label>
-          <Input
-            {...getInputProps(fields.cookingTimeMinutes, { type: "number" })}
-            className={inputClass}
-            min={0}
-          />
+          <Input className={inputClass} min={0} />
         </TextField>
       </div>
 
@@ -280,14 +276,14 @@ export const RecipeForm = ({
           const ingredientFields = item.getFieldset();
           return (
             <div className={itemClass} key={item.key}>
-              <TextField className={fieldClass}>
+              <TextField
+                {...getInputProps(ingredientFields.displayName, {
+                  type: "text",
+                })}
+                className={fieldClass}
+              >
                 <Label>材料名</Label>
-                <Input
-                  {...getInputProps(ingredientFields.displayName, {
-                    type: "text",
-                  })}
-                  className={inputClass}
-                />
+                <Input className={inputClass} />
                 <FieldMessages
                   errors={ingredientFields.displayName.errors}
                   id={ingredientFields.displayName.errorId}
@@ -300,41 +296,40 @@ export const RecipeForm = ({
                   gridTemplateColumns: { base: "1fr", md: "repeat(3, 1fr)" },
                 })}
               >
-                <TextField className={fieldClass}>
+                <TextField
+                  {...getInputProps(ingredientFields.quantityValue, {
+                    type: "number",
+                  })}
+                  className={fieldClass}
+                >
                   <Label>数量</Label>
-                  <Input
-                    {...getInputProps(ingredientFields.quantityValue, {
-                      type: "number",
-                    })}
-                    className={inputClass}
-                    step="any"
-                  />
+                  <Input className={inputClass} step="any" />
                 </TextField>
-                <TextField className={fieldClass}>
+                <TextField
+                  {...getInputProps(ingredientFields.quantityUnit, {
+                    type: "text",
+                  })}
+                  className={fieldClass}
+                >
                   <Label>単位</Label>
-                  <Input
-                    {...getInputProps(ingredientFields.quantityUnit, {
-                      type: "text",
-                    })}
-                    className={inputClass}
-                  />
+                  <Input className={inputClass} />
                 </TextField>
-                <TextField className={fieldClass}>
+                <TextField
+                  {...getInputProps(ingredientFields.quantityText, {
+                    type: "text",
+                  })}
+                  className={fieldClass}
+                >
                   <Label>分量の表記</Label>
-                  <Input
-                    {...getInputProps(ingredientFields.quantityText, {
-                      type: "text",
-                    })}
-                    className={inputClass}
-                  />
+                  <Input className={inputClass} />
                 </TextField>
               </div>
-              <TextField className={fieldClass}>
+              <TextField
+                {...getInputProps(ingredientFields.note, { type: "text" })}
+                className={fieldClass}
+              >
                 <Label>補足</Label>
-                <Input
-                  {...getInputProps(ingredientFields.note, { type: "text" })}
-                  className={inputClass}
-                />
+                <Input className={inputClass} />
               </TextField>
               <Button
                 className={buttonClass}
@@ -376,13 +371,12 @@ export const RecipeForm = ({
           const stepFields = item.getFieldset();
           return (
             <div className={itemClass} key={item.key}>
-              <TextField className={fieldClass}>
+              <TextField
+                {...getTextareaProps(stepFields.body)}
+                className={fieldClass}
+              >
                 <Label>{`手順 ${index + 1}`}</Label>
-                <TextArea
-                  {...getTextareaProps(stepFields.body)}
-                  className={inputClass}
-                  rows={3}
-                />
+                <TextArea className={inputClass} rows={3} />
                 <FieldMessages
                   errors={stepFields.body.errors}
                   id={stepFields.body.errorId}
@@ -429,19 +423,19 @@ export const RecipeForm = ({
             <option value="book">本</option>
             <option value="other">その他</option>
           </select>
-          <TextField className={fieldClass}>
+          <TextField
+            {...getInputProps(sourceFields.sourceName, { type: "text" })}
+            className={fieldClass}
+          >
             <Label>出典名</Label>
-            <Input
-              {...getInputProps(sourceFields.sourceName, { type: "text" })}
-              className={inputClass}
-            />
+            <Input className={inputClass} />
           </TextField>
-          <TextField className={fieldClass}>
+          <TextField
+            {...getInputProps(sourceFields.sourceUrl, { type: "url" })}
+            className={fieldClass}
+          >
             <Label>出典URL</Label>
-            <Input
-              {...getInputProps(sourceFields.sourceUrl, { type: "url" })}
-              className={inputClass}
-            />
+            <Input className={inputClass} />
           </TextField>
         </fieldset>
       ) : (
@@ -455,13 +449,12 @@ export const RecipeForm = ({
           <input
             {...getInputProps(sourceFields.sourceUrl, { type: "hidden" })}
           />
-          <TextField className={fieldClass}>
+          <TextField
+            {...getTextareaProps(fields.changeNote)}
+            className={fieldClass}
+          >
             <Label>変更メモ</Label>
-            <TextArea
-              {...getTextareaProps(fields.changeNote)}
-              className={inputClass}
-              rows={3}
-            />
+            <TextArea className={inputClass} rows={3} />
           </TextField>
         </>
       )}
