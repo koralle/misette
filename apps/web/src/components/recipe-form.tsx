@@ -482,9 +482,9 @@ export const RecipeForm = ({
       {mode === "create" ? (
         <input {...getInputProps(fields.changeNote, { type: "hidden" })} />
       ) : null}
-      <Button className={buttonClass} isDisabled={isPending} type="submit">
+      <button className={buttonClass} disabled={isPending} type="submit">
         {getSubmitLabel(mode, isPending)}
-      </Button>
+      </button>
     </form>
   );
 };
