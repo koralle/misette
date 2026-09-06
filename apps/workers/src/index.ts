@@ -4,6 +4,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 import { createAuth } from "./auth.ts";
+import { createDb } from "./db.ts";
+import { rpcHandler } from "./rpc.ts";
 
 await configure({
   loggers: [
@@ -42,6 +44,27 @@ app.on(
   "/api/auth/*",
   async (c) => await createAuth(c.env).handler(c.req.raw)
 );
+
+app.use("/api/rpc/*", async (c) => {
+  if (!c.env.DB) {
+    throw new Error("D1 database binding DB not configured");
+  }
+  const session = await createAuth(c.env).api.getSession({
+    headers: c.req.raw.headers,
+  });
+  const result = await rpcHandler.handle(c.req.raw, {
+    context: {
+      db: createDb(c.env.DB),
+      session,
+    },
+    prefix: "/api/rpc",
+  });
+
+  if (result.matched) {
+    return result.response;
+  }
+  return await c.notFound();
+});
 
 app.get("/", (c) => c.text("Hello Hono!"));
 

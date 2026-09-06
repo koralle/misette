@@ -25,6 +25,9 @@ const RootComponent = () => {
         <Link to="/about" activeProps={{ className: "font-bold" }}>
           About
         </Link>
+        <Link to="/recipes" activeProps={{ className: "font-bold" }}>
+          レシピ
+        </Link>
       </div>
       <hr />
       <Outlet />

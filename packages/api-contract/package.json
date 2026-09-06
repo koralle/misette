@@ -10,6 +10,10 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@orpc/contract": "catalog:orpc",
+    "valibot": "catalog:frontend"
+  },
   "devDependencies": {
     "@misette/workspace": "workspace:*",
     "typescript": "catalog:typescript"
