@@ -1,17 +1,11 @@
-type RecipeRelationship = "allUsers" | "editor" | "none" | "owner" | "viewer";
+import { recipe, recipeShare } from "@misette/db/schema";
+import { eq, or, sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
 
 interface RecipeAccess {
   canAddRevision: boolean;
   canRead: boolean;
 }
-
-const accessByRelationship: Record<RecipeRelationship, RecipeAccess> = {
-  allUsers: { canAddRevision: false, canRead: true },
-  editor: { canAddRevision: true, canRead: true },
-  none: { canAddRevision: false, canRead: false },
-  owner: { canAddRevision: true, canRead: true },
-  viewer: { canAddRevision: false, canRead: true },
-};
 
 interface RecipeAccessInput {
   ownerUserId: string;
@@ -20,26 +14,53 @@ interface RecipeAccessInput {
   visibility: "all_users" | "private";
 }
 
-const getRelationship = ({
-  ownerUserId,
-  permission,
-  userId,
-  visibility,
-}: RecipeAccessInput): RecipeRelationship => {
-  if (ownerUserId === userId) {
-    return "owner";
+interface AccessRule {
+  access: RecipeAccess;
+  listPredicate: (userId: string) => SQL;
+  matches: (input: RecipeAccessInput) => boolean;
+}
+
+const accessRules: readonly AccessRule[] = [
+  {
+    access: { canAddRevision: true, canRead: true },
+    listPredicate: (userId) => eq(recipe.ownerUserId, userId),
+    matches: ({ ownerUserId, userId }) => ownerUserId === userId,
+  },
+  {
+    access: { canAddRevision: true, canRead: true },
+    listPredicate: () => eq(recipeShare.permission, "editor"),
+    matches: ({ permission }) => permission === "editor",
+  },
+  {
+    access: { canAddRevision: false, canRead: true },
+    listPredicate: () => eq(recipeShare.permission, "viewer"),
+    matches: ({ permission }) => permission === "viewer",
+  },
+  {
+    access: { canAddRevision: false, canRead: true },
+    listPredicate: () => eq(recipe.visibility, "all_users"),
+    matches: ({ visibility }) => visibility === "all_users",
+  },
+  {
+    access: { canAddRevision: false, canRead: false },
+    listPredicate: () => sql`false`,
+    matches: () => true,
+  },
+];
+
+export const getRecipeAccess = (input: RecipeAccessInput): RecipeAccess => {
+  const rule = accessRules.find((candidate) => candidate.matches(input));
+  if (!rule) {
+    throw new Error("Recipe access rules must include a fallback");
   }
-  if (permission === "editor") {
-    return "editor";
-  }
-  if (permission === "viewer") {
-    return "viewer";
-  }
-  if (visibility === "all_users") {
-    return "allUsers";
-  }
-  return "none";
+  return rule.access;
 };
 
-export const getRecipeAccess = (input: RecipeAccessInput): RecipeAccess =>
-  accessByRelationship[getRelationship(input)];
+export const getRecipeListPredicate = (userId: string): SQL => {
+  const predicates = accessRules.map((rule) => rule.listPredicate(userId));
+  const predicate = or(...predicates);
+  if (!predicate) {
+    throw new Error("Recipe access rules must include a list predicate");
+  }
+  return predicate;
+};

@@ -22,7 +22,7 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { createAuth } from "./auth.ts";
 import { createDb } from "./db.ts";
 import app from "./index.ts";
-import { RecipeStore } from "./recipe/store.ts";
+import { RecipeLedger } from "./recipe/ledger.ts";
 
 const MIGRATIONS = [
   "../../../packages/db/drizzle/0000_cynical_prism.sql",
@@ -158,6 +158,18 @@ const countRows = async (table: string): Promise<number> => {
     .prepare(`SELECT count(*) AS count FROM ${table}`)
     .first<{ count: number }>();
   return result?.count ?? 0;
+};
+
+const countRecipeData = async () => {
+  const [ingredients, recipes, revisions, ingredientLines, steps] =
+    await Promise.all([
+      countRows("ingredient"),
+      countRows("recipe"),
+      countRows("recipe_revision"),
+      countRows("recipe_ingredient"),
+      countRows("recipe_step"),
+    ]);
+  return { ingredientLines, ingredients, recipes, revisions, steps };
 };
 
 describe("recipe RPC", () => {
@@ -299,7 +311,7 @@ describe("recipe RPC", () => {
   test("rolls back every recipe row when a later create statement fails", async () => {
     const owner = await signUp("owner@example.com");
     const database = createDb(getState().database);
-    const store = new RecipeStore(database, ({ revisionId }) => [
+    const ledger = new RecipeLedger(database, ({ revisionId }) => [
       database.insert(recipeStep).values({
         body: "失敗する手順",
         id: crypto.randomUUID(),
@@ -308,24 +320,27 @@ describe("recipe RPC", () => {
       }),
     ]);
 
-    await expect(store.create(owner.userId, recipeInput())).rejects.toThrow(
+    await expect(ledger.start(owner.userId, recipeInput())).rejects.toThrow(
       "CHECK constraint failed"
     );
 
-    await expect(countRows("recipe")).resolves.toBe(0);
-    await expect(countRows("recipe_revision")).resolves.toBe(0);
-    await expect(countRows("recipe_ingredient")).resolves.toBe(0);
-    await expect(countRows("recipe_step")).resolves.toBe(0);
+    await expect(countRecipeData()).resolves.toStrictEqual({
+      ingredientLines: 0,
+      ingredients: 0,
+      recipes: 0,
+      revisions: 0,
+      steps: 0,
+    });
   });
 
   test("rolls back a failed revision batch", async () => {
     const owner = await signUp("owner@example.com");
     const database = createDb(getState().database);
-    const created = await new RecipeStore(database).create(
+    const created = await new RecipeLedger(database).start(
       owner.userId,
       recipeInput()
     );
-    const store = new RecipeStore(database, ({ revisionId }) => [
+    const ledger = new RecipeLedger(database, ({ revisionId }) => [
       database.insert(recipeStep).values({
         body: "失敗する手順",
         id: crypto.randomUUID(),
@@ -335,13 +350,16 @@ describe("recipe RPC", () => {
     ]);
 
     await expect(
-      store.createRevision(owner.userId, revisionInput(created.recipeId, 1))
+      ledger.append(owner.userId, revisionInput(created.recipeId, 1))
     ).rejects.toThrow("CHECK constraint failed");
 
-    await expect(countRows("recipe")).resolves.toBe(1);
-    await expect(countRows("recipe_revision")).resolves.toBe(1);
-    await expect(countRows("recipe_ingredient")).resolves.toBe(1);
-    await expect(countRows("recipe_step")).resolves.toBe(2);
+    await expect(countRecipeData()).resolves.toStrictEqual({
+      ingredientLines: 1,
+      ingredients: 1,
+      recipes: 1,
+      revisions: 1,
+      steps: 2,
+    });
   });
 
   test("reports the latest revision for a stale base", async () => {

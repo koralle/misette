@@ -13,31 +13,37 @@ import {
   recipeSource,
   recipeStep,
 } from "@misette/db/schema";
-import { and, desc, eq, isNotNull, isNull, or } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 
 import type { Database } from "../db.ts";
-import { getRecipeAccess } from "./access.ts";
-import { RecipeStoreError } from "./error.ts";
+import { getRecipeAccess, getRecipeListPredicate } from "./access.ts";
+import { LedgerError } from "./error.ts";
 import { foldIngredientName } from "./ingredient.ts";
 
-type BatchExtension = (ids: {
+interface WritePlan {
+  first: BatchItem<"sqlite">;
+  rest: BatchItem<"sqlite">[];
+}
+
+type WritePlanExtension = (ids: {
   recipeId: string;
   revisionId: string;
 }) => BatchItem<"sqlite">[];
 
-type ResolvedIngredient = CreateRecipeInput["ingredients"][number] & {
-  ingredientId: string;
-};
+interface PlannedIngredient {
+  canonicalName: string;
+  id: string;
+  normalizedName: string;
+}
 
 const dateToEpoch = (date: Date): number => date.getTime();
 
-const executeBatch = async (
+const commitWritePlan = async (
   db: Database,
-  first: BatchItem<"sqlite">,
-  rest: BatchItem<"sqlite">[]
+  plan: WritePlan
 ): Promise<void> => {
-  await db.batch([first, ...rest]);
+  await db.batch([plan.first, ...plan.rest]);
 };
 
 const getErrorMessages = (error: Error): string[] => {
@@ -63,13 +69,57 @@ const isRevisionUniqueConflict = (error: Error): boolean =>
       )
   );
 
-export class RecipeStore {
-  private readonly db: Database;
-  private readonly extendBatch: BatchExtension;
+const planIngredientWrites = (
+  db: Database,
+  revisionId: string,
+  lines: CreateRecipeInput["ingredients"]
+): BatchItem<"sqlite">[] => {
+  const plannedIngredients = new Map<string, PlannedIngredient>();
+  for (const line of lines) {
+    const normalizedName = foldIngredientName(line.displayName);
+    if (!plannedIngredients.has(normalizedName)) {
+      plannedIngredients.set(normalizedName, {
+        canonicalName: line.displayName,
+        id: crypto.randomUUID(),
+        normalizedName,
+      });
+    }
+  }
 
-  constructor(db: Database, extendBatch: BatchExtension = () => []) {
+  const claims = [...plannedIngredients.values()].map((planned) =>
+    db
+      .insert(ingredient)
+      .values(planned)
+      .onConflictDoNothing({ target: ingredient.normalizedName })
+  );
+  const ingredientLines = lines.map((line, sortOrder) => {
+    const normalizedName = foldIngredientName(line.displayName);
+    return db.insert(recipeIngredient).select(
+      sql`select
+        ${crypto.randomUUID()},
+        ${revisionId},
+        ${ingredient.id},
+        ${line.displayName},
+        ${line.quantityValue},
+        ${line.quantityUnit},
+        ${line.quantityText},
+        ${line.note},
+        ${sortOrder}
+      from ${ingredient}
+      where ${ingredient.normalizedName} = ${normalizedName}`
+    );
+  });
+
+  return [...claims, ...ingredientLines];
+};
+
+export class RecipeLedger {
+  private readonly db: Database;
+  private readonly extendWritePlan: WritePlanExtension;
+
+  constructor(db: Database, extendWritePlan: WritePlanExtension = () => []) {
     this.db = db;
-    this.extendBatch = extendBatch;
+    this.extendWritePlan = extendWritePlan;
   }
 
   async list(userId: string): Promise<RecipeListItem[]> {
@@ -87,16 +137,7 @@ export class RecipeStore {
         recipeShare,
         and(eq(recipeShare.recipeId, recipe.id), eq(recipeShare.userId, userId))
       )
-      .where(
-        and(
-          isNull(recipe.deletedAt),
-          or(
-            eq(recipe.ownerUserId, userId),
-            eq(recipe.visibility, "all_users"),
-            isNotNull(recipeShare.userId)
-          )
-        )
-      )
+      .where(and(isNull(recipe.deletedAt), getRecipeListPredicate(userId)))
       .orderBy(desc(recipe.updatedAt), desc(recipeRevision.revisionNo));
 
     const latestByRecipe = new Map<string, RecipeListItem>();
@@ -111,15 +152,15 @@ export class RecipeStore {
     return [...latestByRecipe.values()];
   }
 
-  async get(userId: string, recipeId: string): Promise<RecipeDetail> {
+  async open(userId: string, recipeId: string): Promise<RecipeDetail> {
     const identity = await this.getIdentity(userId, recipeId);
     if (!identity) {
-      throw new RecipeStoreError({ kind: "notFound" });
+      throw new LedgerError({ kind: "notFound" });
     }
 
     const access = getRecipeAccess({ ...identity, userId });
     if (!access.canRead) {
-      throw new RecipeStoreError({ kind: "notFound" });
+      throw new LedgerError({ kind: "notFound" });
     }
 
     const [revisionRows, sourceRows] = await Promise.all([
@@ -195,161 +236,145 @@ export class RecipeStore {
     };
   }
 
-  async create(
+  async start(
     userId: string,
     input: CreateRecipeInput
   ): Promise<{ recipeId: string; revisionNo: number }> {
     const recipeId = crypto.randomUUID();
     const revisionId = crypto.randomUUID();
     const now = new Date();
-    const resolvedIngredients = await this.resolveIngredients(
-      input.ingredients
-    );
-
-    const recipeInsert = this.db.insert(recipe).values({
-      createdAt: now,
-      id: recipeId,
-      ownerUserId: userId,
-      updatedAt: now,
-      visibility: "private",
-    });
-    const rest: BatchItem<"sqlite">[] = [
-      this.db.insert(recipeRevision).values({
-        changeNote: null,
-        cookingTimeMinutes: input.cookingTimeMinutes,
+    const plan: WritePlan = {
+      first: this.db.insert(recipe).values({
         createdAt: now,
-        createdByUserId: userId,
-        description: input.description,
-        id: revisionId,
-        recipeId,
-        revisionNo: 1,
-        servingsText: input.servingsText,
-        title: input.title,
+        id: recipeId,
+        ownerUserId: userId,
+        updatedAt: now,
+        visibility: "private",
       }),
-      this.db.insert(recipeSource).values({
-        id: crypto.randomUUID(),
-        importedAt: now,
-        recipeId,
-        sourceName: input.source.sourceName,
-        sourceType: input.source.sourceType,
-        sourceUrl: input.source.sourceUrl,
-      }),
-    ];
-
-    for (const [sortOrder, line] of resolvedIngredients.entries()) {
-      rest.push(
-        this.db.insert(recipeIngredient).values({
-          displayName: line.displayName,
+      rest: [
+        this.db.insert(recipeRevision).values({
+          changeNote: null,
+          cookingTimeMinutes: input.cookingTimeMinutes,
+          createdAt: now,
+          createdByUserId: userId,
+          description: input.description,
+          id: revisionId,
+          recipeId,
+          revisionNo: 1,
+          servingsText: input.servingsText,
+          title: input.title,
+        }),
+        this.db.insert(recipeSource).values({
           id: crypto.randomUUID(),
-          ingredientId: line.ingredientId,
-          note: line.note,
-          quantityText: line.quantityText,
-          quantityUnit: line.quantityUnit,
-          quantityValue: line.quantityValue,
-          recipeRevisionId: revisionId,
-          sortOrder,
-        })
-      );
-    }
-    for (const [sortOrder, step] of input.steps.entries()) {
-      rest.push(
-        this.db.insert(recipeStep).values({
-          body: step.body,
-          id: crypto.randomUUID(),
-          recipeRevisionId: revisionId,
-          sortOrder,
-        })
-      );
-    }
-    rest.push(...this.extendBatch({ recipeId, revisionId }));
+          importedAt: now,
+          recipeId,
+          sourceName: input.source.sourceName,
+          sourceType: input.source.sourceType,
+          sourceUrl: input.source.sourceUrl,
+        }),
+        ...planIngredientWrites(this.db, revisionId, input.ingredients),
+        ...input.steps.map((step, sortOrder) =>
+          this.db.insert(recipeStep).values({
+            body: step.body,
+            id: crypto.randomUUID(),
+            recipeRevisionId: revisionId,
+            sortOrder,
+          })
+        ),
+        ...this.extendWritePlan({ recipeId, revisionId }),
+      ],
+    };
 
-    await executeBatch(this.db, recipeInsert, rest);
+    await commitWritePlan(this.db, plan);
     return { recipeId, revisionNo: 1 };
   }
 
-  async createRevision(
+  async append(
     userId: string,
     input: CreateRecipeRevisionInput
   ): Promise<{ recipeId: string; revisionNo: number }> {
     const identity = await this.getIdentity(userId, input.recipeId);
     if (!identity) {
-      throw new RecipeStoreError({ kind: "notFound" });
+      throw new LedgerError({ kind: "notFound" });
     }
 
     const access = getRecipeAccess({ ...identity, userId });
     if (!access.canRead) {
-      throw new RecipeStoreError({ kind: "notFound" });
+      throw new LedgerError({ kind: "notFound" });
     }
     if (!access.canAddRevision) {
-      throw new RecipeStoreError({ kind: "forbidden" });
+      throw new LedgerError({ kind: "forbidden" });
     }
 
     const latestRevisionNo = await this.getLatestRevisionNo(input.recipeId);
     if (latestRevisionNo !== input.baseRevisionNo) {
-      throw new RecipeStoreError({ kind: "conflict", latestRevisionNo });
+      throw new LedgerError({ kind: "conflict", latestRevisionNo });
     }
 
-    const resolvedIngredients = await this.resolveIngredients(
-      input.ingredients
-    );
     const revisionId = crypto.randomUUID();
     const nextRevisionNo = latestRevisionNo + 1;
     const now = new Date();
-    const revisionInsert = this.db.insert(recipeRevision).values({
-      changeNote: input.changeNote,
-      cookingTimeMinutes: input.cookingTimeMinutes,
-      createdAt: now,
-      createdByUserId: userId,
-      description: input.description,
-      id: revisionId,
-      recipeId: input.recipeId,
-      revisionNo: nextRevisionNo,
-      servingsText: input.servingsText,
-      title: input.title,
-    });
-    const rest: BatchItem<"sqlite">[] = [];
-
-    for (const [sortOrder, line] of resolvedIngredients.entries()) {
-      rest.push(
-        this.db.insert(recipeIngredient).values({
-          displayName: line.displayName,
-          id: crypto.randomUUID(),
-          ingredientId: line.ingredientId,
-          note: line.note,
-          quantityText: line.quantityText,
-          quantityUnit: line.quantityUnit,
-          quantityValue: line.quantityValue,
-          recipeRevisionId: revisionId,
-          sortOrder,
-        })
-      );
-    }
-    for (const [sortOrder, step] of input.steps.entries()) {
-      rest.push(
-        this.db.insert(recipeStep).values({
-          body: step.body,
-          id: crypto.randomUUID(),
-          recipeRevisionId: revisionId,
-          sortOrder,
-        })
-      );
-    }
-    rest.push(
-      this.db
-        .update(recipe)
-        .set({ updatedAt: now })
-        .where(eq(recipe.id, input.recipeId)),
-      ...this.extendBatch({ recipeId: input.recipeId, revisionId })
+    const revisionInsert = this.db.insert(recipeRevision).select(
+      sql`select
+        ${revisionId},
+        ${input.recipeId},
+        ${nextRevisionNo},
+        ${input.title},
+        ${input.description},
+        ${input.servingsText},
+        ${input.cookingTimeMinutes},
+        ${input.changeNote},
+        ${userId},
+        ${now.getTime()}
+      where (
+        select max(${recipeRevision.revisionNo})
+        from ${recipeRevision}
+        where ${recipeRevision.recipeId} = ${input.recipeId}
+      ) = ${input.baseRevisionNo}`
     );
+    const plan: WritePlan = {
+      first: revisionInsert,
+      rest: [
+        ...planIngredientWrites(this.db, revisionId, input.ingredients),
+        ...input.steps.map((step, sortOrder) =>
+          this.db.insert(recipeStep).values({
+            body: step.body,
+            id: crypto.randomUUID(),
+            recipeRevisionId: revisionId,
+            sortOrder,
+          })
+        ),
+        this.db
+          .update(recipe)
+          .set({
+            updatedAt: now,
+            visibility: sql`case
+              when exists (
+                select 1
+                from ${recipeRevision}
+                where ${recipeRevision.id} = ${revisionId}
+              )
+              then ${recipe.visibility}
+              else ${"conflict"}
+            end`,
+          })
+          .where(eq(recipe.id, input.recipeId)),
+        ...this.extendWritePlan({ recipeId: input.recipeId, revisionId }),
+      ],
+    };
 
     try {
-      await executeBatch(this.db, revisionInsert, rest);
+      await commitWritePlan(this.db, plan);
     } catch (error) {
-      if (error instanceof Error && isRevisionUniqueConflict(error)) {
-        const currentRevisionNo = await this.getLatestRevisionNo(
-          input.recipeId
-        );
-        throw new RecipeStoreError({
+      if (!(error instanceof Error)) {
+        throw error;
+      }
+      const currentRevisionNo = await this.getLatestRevisionNo(input.recipeId);
+      if (
+        isRevisionUniqueConflict(error) ||
+        currentRevisionNo !== input.baseRevisionNo
+      ) {
+        throw new LedgerError({
           kind: "conflict",
           latestRevisionNo: currentRevisionNo,
         });
@@ -393,71 +418,5 @@ export class RecipeStore {
       throw new Error("Recipe persistence invariant violated");
     }
     return latest.revisionNo;
-  }
-
-  private async resolveIngredients(
-    lines: CreateRecipeInput["ingredients"]
-  ): Promise<ResolvedIngredient[]> {
-    const canonicalNames = new Map<string, string>();
-    for (const line of lines) {
-      const normalizedName = foldIngredientName(line.displayName);
-      if (!canonicalNames.has(normalizedName)) {
-        canonicalNames.set(normalizedName, line.displayName);
-      }
-    }
-
-    const resolvedEntries = await Promise.all(
-      [...canonicalNames].map(async ([normalizedName, canonicalName]) => {
-        const existing = await this.findIngredient(normalizedName);
-        const id =
-          existing?.id ??
-          (await this.insertAndFindIngredient(canonicalName, normalizedName));
-        return [normalizedName, id] as const;
-      })
-    );
-    const idsByNormalizedName = new Map(resolvedEntries);
-
-    return lines.map((line) => {
-      const ingredientId = idsByNormalizedName.get(
-        foldIngredientName(line.displayName)
-      );
-      if (ingredientId === undefined || ingredientId.length === 0) {
-        throw new Error("Ingredient persistence invariant violated");
-      }
-      return { ...line, ingredientId };
-    });
-  }
-
-  private async findIngredient(
-    normalizedName: string
-  ): Promise<{ id: string } | undefined> {
-    const rows = await this.db
-      .select({ id: ingredient.id })
-      .from(ingredient)
-      .where(eq(ingredient.normalizedName, normalizedName))
-      .limit(1);
-    const [found] = rows;
-    return found;
-  }
-
-  private async insertAndFindIngredient(
-    canonicalName: string,
-    normalizedName: string
-  ): Promise<string> {
-    const id = crypto.randomUUID();
-    try {
-      await this.db.insert(ingredient).values({
-        canonicalName,
-        id,
-        normalizedName,
-      });
-      return id;
-    } catch (error) {
-      const racedIngredient = await this.findIngredient(normalizedName);
-      if (racedIngredient) {
-        return racedIngredient.id;
-      }
-      throw error;
-    }
   }
 }

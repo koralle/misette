@@ -3,8 +3,8 @@ import { ORPCError, implement } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 
 import type { Database } from "./db.ts";
-import { RecipeStoreError } from "./recipe/error.ts";
-import { RecipeStore } from "./recipe/store.ts";
+import { LedgerError } from "./recipe/error.ts";
+import { RecipeLedger } from "./recipe/ledger.ts";
 
 export interface RpcContext {
   db: Database;
@@ -24,8 +24,8 @@ const requireSession = os.middleware(({ context, next }) => {
 });
 const authenticated = os.use(requireSession);
 
-const mapStoreError = (error: Error): never => {
-  if (error instanceof RecipeStoreError) {
+const mapLedgerError = (error: Error): never => {
+  if (error instanceof LedgerError) {
     switch (error.failure.kind) {
       case "conflict": {
         throw new ORPCError("CONFLICT", {
@@ -50,58 +50,58 @@ export const router = authenticated.router({
   recipe: {
     create: authenticated.recipe.create.handler(async ({ context, input }) => {
       try {
-        return await new RecipeStore(context.db).create(context.userId, input);
+        return await new RecipeLedger(context.db).start(context.userId, input);
       } catch (error) {
         if (!(error instanceof Error)) {
-          throw new Error("Recipe store threw a non-error value", {
+          throw new Error("Recipe ledger threw a non-error value", {
             cause: error,
           });
         }
-        return mapStoreError(error);
+        return mapLedgerError(error);
       }
     }),
     createRevision: authenticated.recipe.createRevision.handler(
       async ({ context, input }) => {
         try {
-          return await new RecipeStore(context.db).createRevision(
+          return await new RecipeLedger(context.db).append(
             context.userId,
             input
           );
         } catch (error) {
           if (!(error instanceof Error)) {
-            throw new Error("Recipe store threw a non-error value", {
+            throw new Error("Recipe ledger threw a non-error value", {
               cause: error,
             });
           }
-          return mapStoreError(error);
+          return mapLedgerError(error);
         }
       }
     ),
     get: authenticated.recipe.get.handler(async ({ context, input }) => {
       try {
-        return await new RecipeStore(context.db).get(
+        return await new RecipeLedger(context.db).open(
           context.userId,
           input.recipeId
         );
       } catch (error) {
         if (!(error instanceof Error)) {
-          throw new Error("Recipe store threw a non-error value", {
+          throw new Error("Recipe ledger threw a non-error value", {
             cause: error,
           });
         }
-        return mapStoreError(error);
+        return mapLedgerError(error);
       }
     }),
     list: authenticated.recipe.list.handler(async ({ context }) => {
       try {
-        return await new RecipeStore(context.db).list(context.userId);
+        return await new RecipeLedger(context.db).list(context.userId);
       } catch (error) {
         if (!(error instanceof Error)) {
-          throw new Error("Recipe store threw a non-error value", {
+          throw new Error("Recipe ledger threw a non-error value", {
             cause: error,
           });
         }
-        return mapStoreError(error);
+        return mapLedgerError(error);
       }
     }),
   },

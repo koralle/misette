@@ -1,14 +1,14 @@
-export type RecipeStoreFailure =
+export type LedgerFailure =
   | { kind: "conflict"; latestRevisionNo: number }
   | { kind: "forbidden" }
   | { kind: "notFound" };
 
-export class RecipeStoreError extends Error {
-  readonly failure: RecipeStoreFailure;
+export class LedgerError extends Error {
+  readonly failure: LedgerFailure;
 
-  constructor(failure: RecipeStoreFailure) {
-    super(`Recipe store failed: ${failure.kind}`);
-    this.name = "RecipeStoreError";
+  constructor(failure: LedgerFailure) {
+    super(`Recipe ledger failed: ${failure.kind}`);
+    this.name = "LedgerError";
     this.failure = failure;
   }
 }
