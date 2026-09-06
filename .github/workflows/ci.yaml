@@ -68,3 +68,68 @@ jobs:
         shell: bash
         run: |
           pnpm run build
+
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup
+        uses: ./.github/composite-actions/cache-and-install
+
+      - name: Node tests
+        shell: bash
+        run: |
+          pnpm run test
+
+  browser-test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup
+        uses: ./.github/composite-actions/cache-and-install
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          pnpm --filter @misette/web exec playwright install --with-deps chromium
+
+      - name: Browser tests
+        shell: bash
+        run: |
+          pnpm run test:browser
+
+      - name: Build
+        shell: bash
+        run: |
+          pnpm --filter @misette/web build
+
+      - name: Accessibility smoke
+        shell: bash
+        run: |
+          pnpm --filter @misette/web e2e
+
+  lighthouse:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup
+        uses: ./.github/composite-actions/cache-and-install
+
+      - name: Build
+        shell: bash
+        run: |
+          pnpm run build
+
+      - name: Lighthouse CI
+        shell: bash
+        run: |
+          pnpm run lighthouse

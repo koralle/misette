@@ -20,6 +20,11 @@ export default defineConfig({
     'worker-configuration.d.ts',
     '**/worker-configuration.d.ts',
     '**/routeTree.gen.ts',
+    'styled-system/**',
+    '**/styled-system/**',
+    'playwright-report/**',
+    'test-results/**',
+    '.lighthouseci/**',
     'packages/*/src/*.d.ts',
     'packages/*/src/**/*.d.ts',
     'packages/*/src/*.d.ts.map',
@@ -59,7 +64,7 @@ export default defineConfig({
   },
   overrides: [
     {
-      files: ['apps/web/src/routes/**/*.tsx'],
+      files: ['apps/web/src/main.tsx', 'apps/web/src/routes/**/*.tsx'],
       rules: {
         'no-use-before-define': 'off',
         'no-void': 'off',
@@ -72,6 +77,9 @@ export default defineConfig({
         'oxlint.config.ts',
         'vite.config.ts',
         'vitest.config.ts',
+        'playwright.config.ts',
+        'panda.config.ts',
+        'postcss.config.ts',
         'knip.config.ts',
         '**/drizzle.config.ts',
       ],
@@ -80,10 +88,25 @@ export default defineConfig({
       },
     },
     {
-      files: ['apps/*/vite.config.ts', 'apps/*/vitest.config.ts'],
+      files: [
+        'apps/*/vite.config.ts',
+        'apps/*/vitest.config.ts',
+        'apps/*/playwright.config.ts',
+        'apps/*/panda.config.ts',
+        'apps/*/postcss.config.ts',
+      ],
       rules: {
         'import/no-default-export': 'off',
         'node/no-process-env': 'off',
+        'import/no-nodejs-modules': 'off',
+        'new-cap': 'off',
+      },
+    },
+    {
+      files: ['**/*.{test,spec}.{ts,tsx}', '**/e2e/**/*.ts'],
+      rules: {
+        'no-void': 'off',
+        'max-lines-per-function': 'off',
       },
     },
     {

@@ -15,16 +15,22 @@
     "dev": "turbo run dev",
     "format": "oxfmt .",
     "format:check": "oxfmt . --check",
+    "lighthouse": "lhci autorun",
     "lint": "oxlint .",
     "lint:fix": "oxlint . --fix",
     "preview": "turbo run preview",
+    "react:doctor": "react-doctor apps/web",
+    "test": "turbo run test",
+    "test:browser": "turbo run test:browser",
     "typecheck": "turbo run typecheck --continue"
   },
   "devDependencies": {
+    "@lhci/cli": "catalog:testing",
     "@tsconfig/strictest": "catalog:typescript",
     "lefthook": "catalog:githooks",
     "oxfmt": "catalog:lint",
     "oxlint": "catalog:lint",
+    "react-doctor": "catalog:lint",
     "turbo": "catalog:tooling",
     "typescript": "catalog:typescript"
   },

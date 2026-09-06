@@ -5,6 +5,8 @@ export default defineConfig({
     'pnpm-lock.yaml',
     '**/worker-configuration.d.ts',
     '**/routeTree.gen.ts',
+    'styled-system/**',
+    '**/styled-system/**',
     'packages/*/src/*.d.ts',
     'packages/*/src/*.d.ts.map',
     'packages/db/drizzle/**',

@@ -3,7 +3,17 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "public/**", "index.html", "vite.config.*", "tsconfig.*", "wrangler.*", "worker/**"],
+      "inputs": [
+        "src/**",
+        "public/**",
+        "index.html",
+        "vite.config.*",
+        "tsconfig.*",
+        "wrangler.*",
+        "worker/**",
+        "panda.config.*",
+        "postcss.config.*"
+      ],
       "outputs": ["dist/**", ".wrangler/**"]
     },
     "cf-typegen": {
@@ -34,9 +44,17 @@
       "cache": false,
       "dependsOn": ["build"]
     },
+    "test": {
+      "inputs": ["src/**", "vitest.config.*", "tsconfig.*"],
+      "outputs": []
+    },
+    "test:browser": {
+      "inputs": ["src/**", "vitest.config.*", "tsconfig.*"],
+      "outputs": []
+    },
     "typecheck": {
       "dependsOn": ["^typecheck"],
-      "inputs": ["src/**", "tsconfig.*", "worker/**"],
+      "inputs": ["src/**", "tsconfig.*", "worker/**", "panda.config.*"],
       "outputs": []
     }
   }

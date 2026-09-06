@@ -2,6 +2,11 @@ node_modules
 dist/
 .wrangler/
 .turbo/
+styled-system/
+playwright-report/
+test-results/
+.lighthouseci/
+lighthouse-reports/
 packages/*/src/**/*.d.ts
 packages/*/src/**/*.d.ts.map
 .env
