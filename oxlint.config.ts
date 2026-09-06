@@ -13,6 +13,13 @@ export default defineConfig({
     "packages/db/src/schema/auth.ts",
   ],
   overrides: [
+    // Work around https://github.com/haydenbleasel/ultracite/issues/789.
+    {
+      files: ["apps/web/src/routes/**/*.{ts,tsx}"],
+      rules: {
+        "no-use-before-define": "off",
+      },
+    },
     {
       files: ["packages/db/src/schema/**/*.ts"],
       rules: {
