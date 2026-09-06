@@ -12,19 +12,17 @@ import {
 import { css } from "styled-system/css";
 import * as v from "valibot";
 
-const textValue = v.optional(v.string(), "");
-const nullableStringSchema = v.pipe(
-  textValue,
-  v.transform((value) => value.trim() || null)
+const nullableStringSchema = v.nullish(
+  v.pipe(
+    v.string(),
+    v.transform((value) => value.trim() || null)
+  ),
+  null
 );
-const nullableNumberSchema = v.pipe(
-  textValue,
-  v.transform((value) => (value.trim() ? Number(value) : null)),
-  v.nullable(v.number())
-);
-const nullableMinutesSchema = v.pipe(
-  nullableNumberSchema,
-  v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0)))
+const nullableNumberSchema = v.nullish(v.number(), null);
+const nullableMinutesSchema = v.nullish(
+  v.pipe(v.number(), v.integer(), v.minValue(0)),
+  null
 );
 const recipeFormSchema = v.object({
   changeNote: nullableStringSchema,

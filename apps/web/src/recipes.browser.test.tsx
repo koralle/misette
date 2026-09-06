@@ -173,6 +173,7 @@ describe("recipe routes", () => {
     const screen = await renderRoute("/recipes/recipe-1/edit");
     const title = screen.getByRole("textbox", { name: "タイトル" });
 
+    await expect.element(title).toHaveValue("味噌汁");
     await userEvent.clear(title);
     await userEvent.fill(title, "赤だし味噌汁");
     await userEvent.click(
@@ -206,8 +207,8 @@ describe("recipe routes", () => {
     );
 
     await expect
-      .element(screen.getByRole("alert"))
-      .toHaveTextContent("編集中にレシピが更新された");
+      .element(screen.getByText("編集中にレシピが更新された"))
+      .toBeVisible();
     await expect
       .element(screen.getByRole("link", { name: "最新版を確認する" }))
       .toBeVisible();
