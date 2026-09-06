@@ -24,6 +24,8 @@ const nullableMinutesSchema = v.nullish(
   v.pipe(v.number(), v.integer(), v.minValue(0)),
   null
 );
+const requiredText = (message: string) =>
+  v.pipe(v.nullish(v.string(), ""), v.trim(), v.minLength(1, message));
 const recipeFormSchema = v.object({
   changeNote: nullableStringSchema,
   cookingTimeMinutes: nullableMinutesSchema,
@@ -31,11 +33,7 @@ const recipeFormSchema = v.object({
   ingredients: v.optional(
     v.array(
       v.object({
-        displayName: v.pipe(
-          v.string(),
-          v.trim(),
-          v.minLength(1, "材料名は必須です")
-        ),
+        displayName: requiredText("材料名は必須です"),
         note: nullableStringSchema,
         quantityText: nullableStringSchema,
         quantityUnit: nullableStringSchema,
@@ -53,12 +51,12 @@ const recipeFormSchema = v.object({
   steps: v.optional(
     v.array(
       v.object({
-        body: v.pipe(v.string(), v.trim(), v.minLength(1, "手順は必須です")),
+        body: requiredText("手順は必須です"),
       })
     ),
     []
   ),
-  title: v.pipe(v.string(), v.trim(), v.minLength(1, "タイトルは必須です")),
+  title: requiredText("タイトルは必須です"),
 });
 
 export interface RecipeFormValue {
