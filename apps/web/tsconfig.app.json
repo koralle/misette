@@ -2,7 +2,10 @@
   "$schema": "https://www.schemastore.org/tsconfig",
   "extends": "@misette/workspace/typescript/tsconfig.app.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo"
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "paths": {
+      "styled-system/*": ["./styled-system/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "styled-system"]
 }

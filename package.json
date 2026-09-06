@@ -10,19 +10,25 @@
   "scripts": {
     "build": "turbo run build",
     "cf-typegen": "turbo run cf-typegen",
-    "check": "ultracite check --type-aware && turbo run typecheck --continue",
+    "check": "pnpm --filter @misette/web panda && ultracite check --type-aware && turbo run typecheck --continue",
     "deploy": "turbo run deploy",
     "dev": "turbo run dev",
     "fix": "ultracite fix --type-aware --no-error-on-unmatched-pattern",
+    "lighthouse": "lhci autorun",
     "preview": "turbo run preview",
+    "react:doctor": "react-doctor apps/web",
+    "test": "turbo run test",
+    "test:browser": "turbo run test:browser",
     "typecheck": "turbo run typecheck --continue"
   },
   "devDependencies": {
+    "@lhci/cli": "catalog:testing",
     "@tsconfig/strictest": "catalog:typescript",
     "lefthook": "catalog:githooks",
     "oxfmt": "catalog:lint",
     "oxlint": "catalog:lint",
     "oxlint-tsgolint": "catalog:lint",
+    "react-doctor": "catalog:lint",
     "turbo": "catalog:tooling",
     "typescript": "catalog:typescript",
     "ultracite": "catalog:lint"

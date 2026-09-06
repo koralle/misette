@@ -6,7 +6,10 @@ pnpm-debug.log*
 node_modules
 dist
 dist-ssr
+styled-system
 *.local
+playwright-report
+test-results
 
 # Editor directories and files
 .vscode/*

@@ -11,6 +11,11 @@ export default defineConfig({
     ...core.ignorePatterns,
     "packages/db/drizzle/**",
     "packages/db/src/schema/auth.ts",
+    "styled-system/**",
+    "**/styled-system/**",
+    "playwright-report/**",
+    "test-results/**",
+    ".lighthouseci/**",
   ],
   overrides: [
     // Work around https://github.com/haydenbleasel/ultracite/issues/789.

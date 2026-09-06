@@ -1,9 +1,27 @@
+import { honoLogger } from "@logtape/hono";
+import { configure, getConsoleSink } from "@logtape/logtape";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 import { createAuth } from "./auth.ts";
 
+await configure({
+  loggers: [
+    {
+      category: ["logtape", "meta"],
+      lowestLevel: "warning",
+      sinks: ["console"],
+    },
+    { category: ["hono"], lowestLevel: "info", sinks: ["console"] },
+  ],
+  sinks: {
+    console: getConsoleSink(),
+  },
+});
+
 const app = new Hono<{ Bindings: CloudflareBindings }>();
+
+app.use(honoLogger());
 
 app.use("/api/auth/*", async (c, next) => {
   const authCors = cors({

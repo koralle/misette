@@ -17,6 +17,8 @@
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "catalog:auth",
+    "@logtape/hono": "catalog:workers",
+    "@logtape/logtape": "catalog:workers",
     "@misette/db": "workspace:*",
     "better-auth": "catalog:auth",
     "drizzle-orm": "catalog:db",

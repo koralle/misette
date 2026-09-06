@@ -3,9 +3,14 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import "./index.css";
+import { createQueryClient } from "./lib/query-client.ts";
 import { routeTree } from "./routeTree.gen.ts";
 
-const router = createRouter({ routeTree });
+const queryClient = createQueryClient();
+const router = createRouter({
+  context: { queryClient },
+  routeTree,
+});
 
 declare module "@tanstack/react-router" {
   interface Register {
