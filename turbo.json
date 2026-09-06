@@ -49,7 +49,7 @@
       "outputs": []
     },
     "test:browser": {
-      "inputs": ["src/**", "vitest.config.*", "tsconfig.*"],
+      "inputs": ["src/**", "vitest.config.*", "tsconfig.*", "panda.config.*", "postcss.config.*"],
       "outputs": []
     },
     "typecheck": {
