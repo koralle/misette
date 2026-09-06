@@ -128,9 +128,7 @@ describe("recipe routes", () => {
     await userEvent.click(screen.getByRole("button", { name: "レシピを作成" }));
 
     await expect.poll(() => create.mock.calls.length).toBe(1);
-    expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "だし巻き卵" })
-    );
+    expect(create.mock.calls[0]?.[0]).toMatchObject({ title: "だし巻き卵" });
   });
 
   test("レシピ詳細に最新版の材料、手順、出典を表示する", async () => {
@@ -181,13 +179,11 @@ describe("recipe routes", () => {
     );
 
     await expect.poll(() => createRevision.mock.calls.length).toBe(1);
-    expect(createRevision).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseRevisionNo: 1,
-        recipeId: "recipe-1",
-        title: "赤だし味噌汁",
-      })
-    );
+    expect(createRevision.mock.calls[0]?.[0]).toMatchObject({
+      baseRevisionNo: 1,
+      recipeId: "recipe-1",
+      title: "赤だし味噌汁",
+    });
   });
 
   test("競合時は入力を残して最新版へのリンクを表示する", async () => {
