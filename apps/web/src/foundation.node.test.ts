@@ -1,8 +1,9 @@
 import { parseWithValibot } from "@conform-to/valibot";
 import { CalendarDate } from "@internationalized/date";
-import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import * as v from "valibot";
 import { describe, expect, test } from "vitest";
+
+import { orpc, orpcClient } from "./lib/orpc.ts";
 
 describe("foundation node smoke", () => {
   test("foundation libraries parse a date, a valibot form, and an orpc query helper", () => {
@@ -17,6 +18,7 @@ describe("foundation node smoke", () => {
     const submission = parseWithValibot(formData, { schema });
     expect(submission.status).toBe("success");
 
-    expect(createTanstackQueryUtils).toBeTypeOf("function");
+    expect(orpcClient).toBeTypeOf("function");
+    expect(orpc.key()[0]).toStrictEqual([]);
   });
 });

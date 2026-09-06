@@ -20,7 +20,7 @@ export default defineConfig({
   overrides: [
     // Work around https://github.com/haydenbleasel/ultracite/issues/789.
     {
-      files: ["apps/web/src/main.tsx", "apps/web/src/routes/**/*.{ts,tsx}"],
+      files: ["apps/web/src/routes/**/*.{ts,tsx}"],
       rules: {
         "no-use-before-define": "off",
       },

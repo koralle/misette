@@ -18,10 +18,6 @@ declare module "@tanstack/react-router" {
   }
 }
 
-if (import.meta.env.DEV) {
-  void import("./dev/react-scan.ts");
-}
-
 const rootElement = document.querySelector("#root");
 
 if (!rootElement) {

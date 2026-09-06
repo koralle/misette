@@ -17,6 +17,9 @@ export default defineConfig({
     projects: [
       {
         test: {
+          env: {
+            VITE_BETTER_AUTH_URL: "http://127.0.0.1:5173",
+          },
           environment: "node",
           include: ["src/**/*.node.test.ts"],
           name: "node",
