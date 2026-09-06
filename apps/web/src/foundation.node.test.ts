@@ -18,7 +18,7 @@ describe("foundation node smoke", () => {
     const submission = parseWithValibot(formData, { schema });
     expect(submission.status).toBe("success");
 
-    expect(orpcClient).toBeTypeOf("function");
+    expect(orpcClient.recipe.list).toBeTypeOf("function");
     expect(orpc.key()[0]).toStrictEqual([]);
   });
 });
