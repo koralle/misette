@@ -1,9 +1,4 @@
-import {
-  getFormProps,
-  getInputProps,
-  getTextareaProps,
-  useForm,
-} from "@conform-to/react";
+import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithValibot } from "@conform-to/valibot";
 import type { CreateRecipeInput } from "@misette/api-contract";
 import { Link } from "@tanstack/react-router";
@@ -17,12 +12,13 @@ import {
 import { css } from "styled-system/css";
 import * as v from "valibot";
 
+const textValue = v.optional(v.string(), "");
 const nullableStringSchema = v.pipe(
-  v.string(),
+  textValue,
   v.transform((value) => value.trim() || null)
 );
 const nullableNumberSchema = v.pipe(
-  v.string(),
+  textValue,
   v.transform((value) => (value.trim() ? Number(value) : null)),
   v.nullable(v.number())
 );
@@ -37,7 +33,11 @@ const recipeFormSchema = v.object({
   ingredients: v.optional(
     v.array(
       v.object({
-        displayName: v.pipe(v.string(), v.trim(), v.minLength(1)),
+        displayName: v.pipe(
+          v.string(),
+          v.trim(),
+          v.minLength(1, "材料名は必須です")
+        ),
         note: nullableStringSchema,
         quantityText: nullableStringSchema,
         quantityUnit: nullableStringSchema,
@@ -55,16 +55,13 @@ const recipeFormSchema = v.object({
   steps: v.optional(
     v.array(
       v.object({
-        body: v.pipe(v.string(), v.trim(), v.minLength(1)),
+        body: v.pipe(v.string(), v.trim(), v.minLength(1, "手順は必須です")),
       })
     ),
     []
   ),
   title: v.pipe(v.string(), v.trim(), v.minLength(1, "タイトルは必須です")),
 });
-
-type RecipeFormInput = v.InferInput<typeof recipeFormSchema>;
-type RecipeFormOutput = v.InferOutput<typeof recipeFormSchema>;
 
 export interface RecipeFormValue {
   changeNote: string | null;
@@ -77,6 +74,14 @@ interface RecipeFormProps {
   isPending: boolean;
   mode: "create" | "revision";
   onSubmit: (value: RecipeFormValue) => void;
+}
+
+interface FormField {
+  errorId: string;
+  errors?: string[] | undefined;
+  initialValue?: number | string | null | undefined;
+  key?: string | undefined;
+  name: string;
 }
 
 const defaultRecipe: CreateRecipeInput = {
@@ -92,29 +97,6 @@ const defaultRecipe: CreateRecipeInput = {
   steps: [],
   title: "",
 };
-
-const getFormDefaultValue = (
-  initialValue: CreateRecipeInput & { changeNote?: string | null }
-): RecipeFormInput => ({
-  changeNote: initialValue.changeNote ?? "",
-  cookingTimeMinutes: initialValue.cookingTimeMinutes?.toString() ?? "",
-  description: initialValue.description ?? "",
-  ingredients: initialValue.ingredients.map((line) => ({
-    displayName: line.displayName,
-    note: line.note ?? "",
-    quantityText: line.quantityText ?? "",
-    quantityUnit: line.quantityUnit ?? "",
-    quantityValue: line.quantityValue?.toString() ?? "",
-  })),
-  servingsText: initialValue.servingsText ?? "",
-  source: {
-    sourceName: initialValue.source.sourceName ?? "",
-    sourceType: initialValue.source.sourceType,
-    sourceUrl: initialValue.source.sourceUrl ?? "",
-  },
-  steps: initialValue.steps,
-  title: initialValue.title,
-});
 
 const formClass = css({
   display: "grid",
@@ -170,6 +152,36 @@ const itemClass = css({
   p: "4",
 });
 
+const asInputValue = (value: number | string | null | undefined): string => {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  return String(value);
+};
+
+const toFormDefaultValue = (
+  value: CreateRecipeInput & { changeNote?: string | null }
+) => ({
+  changeNote: value.changeNote ?? "",
+  cookingTimeMinutes: asInputValue(value.cookingTimeMinutes),
+  description: value.description ?? "",
+  ingredients: value.ingredients.map((line) => ({
+    displayName: line.displayName,
+    note: line.note ?? "",
+    quantityText: line.quantityText ?? "",
+    quantityUnit: line.quantityUnit ?? "",
+    quantityValue: asInputValue(line.quantityValue),
+  })),
+  servingsText: value.servingsText ?? "",
+  source: {
+    sourceName: value.source.sourceName ?? "",
+    sourceType: value.source.sourceType,
+    sourceUrl: value.source.sourceUrl ?? "",
+  },
+  steps: value.steps.map((step) => ({ body: step.body })),
+  title: value.title,
+});
+
 const FieldMessages = ({
   errors,
   id,
@@ -182,6 +194,39 @@ const FieldMessages = ({
       {errors.join("、")}
     </p>
   ) : null;
+
+const RecipeTextField = ({
+  field,
+  inputType = "text",
+  label,
+  min,
+  rows,
+  step,
+}: {
+  field: FormField;
+  inputType?: "number" | "text" | "url";
+  label: string;
+  min?: number;
+  rows?: number;
+  step?: string;
+}) => (
+  <TextField
+    className={fieldClass}
+    defaultValue={asInputValue(field.initialValue)}
+    isInvalid={Boolean(field.errors?.length)}
+    key={field.key}
+    name={field.name}
+    type={inputType}
+  >
+    <Label>{label}</Label>
+    {rows === undefined ? (
+      <Input className={inputClass} min={min} step={step} />
+    ) : (
+      <TextArea className={inputClass} rows={rows} />
+    )}
+    <FieldMessages errors={field.errors} id={field.errorId} />
+  </TextField>
+);
 
 const getSubmitLabel = (
   mode: RecipeFormProps["mode"],
@@ -201,17 +246,20 @@ export const RecipeForm = ({
   initialValue = defaultRecipe,
   isPending,
   mode,
-  onSubmit,
+  onSubmit: submitRecipe,
 }: RecipeFormProps) => {
-  const [form, fields] = useForm<RecipeFormInput, RecipeFormOutput>({
-    defaultValue: getFormDefaultValue(initialValue),
-    onSubmit(event, { submission }) {
+  const [form, fields] = useForm({
+    defaultValue: toFormDefaultValue(initialValue),
+    onSubmit(event) {
       event.preventDefault();
-      if (submission?.status !== "success") {
+      const submission = parseWithValibot(new FormData(event.currentTarget), {
+        schema: recipeFormSchema,
+      });
+      if (submission.status !== "success") {
         return;
       }
       const { changeNote, ...recipe } = submission.value;
-      onSubmit({ changeNote, recipe });
+      submitRecipe({ changeNote, recipe });
     },
     onValidate({ formData }) {
       return parseWithValibot(formData, { schema: recipeFormSchema });
@@ -247,23 +295,8 @@ export const RecipeForm = ({
         </div>
       ) : null}
 
-      <TextField
-        {...getInputProps(fields.title, { type: "text" })}
-        className={fieldClass}
-        isInvalid={Boolean(fields.title.errors?.length)}
-      >
-        <Label>タイトル</Label>
-        <Input className={inputClass} />
-        <FieldMessages errors={fields.title.errors} id={fields.title.errorId} />
-      </TextField>
-
-      <TextField
-        {...getTextareaProps(fields.description)}
-        className={fieldClass}
-      >
-        <Label>説明</Label>
-        <TextArea className={inputClass} rows={4} />
-      </TextField>
+      <RecipeTextField field={fields.title} label="タイトル" />
+      <RecipeTextField field={fields.description} label="説明" rows={4} />
 
       <div
         className={css({
@@ -272,20 +305,13 @@ export const RecipeForm = ({
           gridTemplateColumns: { base: "1fr", md: "1fr 1fr" },
         })}
       >
-        <TextField
-          {...getInputProps(fields.servingsText, { type: "text" })}
-          className={fieldClass}
-        >
-          <Label>分量</Label>
-          <Input className={inputClass} />
-        </TextField>
-        <TextField
-          {...getInputProps(fields.cookingTimeMinutes, { type: "number" })}
-          className={fieldClass}
-        >
-          <Label>調理時間（分）</Label>
-          <Input className={inputClass} min={0} />
-        </TextField>
+        <RecipeTextField field={fields.servingsText} label="分量" />
+        <RecipeTextField
+          field={fields.cookingTimeMinutes}
+          inputType="number"
+          label="調理時間（分）"
+          min={0}
+        />
       </div>
 
       <fieldset className={fieldClass}>
@@ -296,19 +322,10 @@ export const RecipeForm = ({
           const ingredientFields = item.getFieldset();
           return (
             <div className={itemClass} key={item.key}>
-              <TextField
-                {...getInputProps(ingredientFields.displayName, {
-                  type: "text",
-                })}
-                className={fieldClass}
-              >
-                <Label>材料名</Label>
-                <Input className={inputClass} />
-                <FieldMessages
-                  errors={ingredientFields.displayName.errors}
-                  id={ingredientFields.displayName.errorId}
-                />
-              </TextField>
+              <RecipeTextField
+                field={ingredientFields.displayName}
+                label="材料名"
+              />
               <div
                 className={css({
                   display: "grid",
@@ -316,41 +333,22 @@ export const RecipeForm = ({
                   gridTemplateColumns: { base: "1fr", md: "repeat(3, 1fr)" },
                 })}
               >
-                <TextField
-                  {...getInputProps(ingredientFields.quantityValue, {
-                    type: "number",
-                  })}
-                  className={fieldClass}
-                >
-                  <Label>数量</Label>
-                  <Input className={inputClass} step="any" />
-                </TextField>
-                <TextField
-                  {...getInputProps(ingredientFields.quantityUnit, {
-                    type: "text",
-                  })}
-                  className={fieldClass}
-                >
-                  <Label>単位</Label>
-                  <Input className={inputClass} />
-                </TextField>
-                <TextField
-                  {...getInputProps(ingredientFields.quantityText, {
-                    type: "text",
-                  })}
-                  className={fieldClass}
-                >
-                  <Label>分量の表記</Label>
-                  <Input className={inputClass} />
-                </TextField>
+                <RecipeTextField
+                  field={ingredientFields.quantityValue}
+                  inputType="number"
+                  label="数量"
+                  step="any"
+                />
+                <RecipeTextField
+                  field={ingredientFields.quantityUnit}
+                  label="単位"
+                />
+                <RecipeTextField
+                  field={ingredientFields.quantityText}
+                  label="分量の表記"
+                />
               </div>
-              <TextField
-                {...getInputProps(ingredientFields.note, { type: "text" })}
-                className={fieldClass}
-              >
-                <Label>補足</Label>
-                <Input className={inputClass} />
-              </TextField>
+              <RecipeTextField field={ingredientFields.note} label="補足" />
               <Button
                 className={buttonClass}
                 onPress={() => {
@@ -391,17 +389,11 @@ export const RecipeForm = ({
           const stepFields = item.getFieldset();
           return (
             <div className={itemClass} key={item.key}>
-              <TextField
-                {...getTextareaProps(stepFields.body)}
-                className={fieldClass}
-              >
-                <Label>{`手順 ${index + 1}`}</Label>
-                <TextArea className={inputClass} rows={3} />
-                <FieldMessages
-                  errors={stepFields.body.errors}
-                  id={stepFields.body.errorId}
-                />
-              </TextField>
+              <RecipeTextField
+                field={stepFields.body}
+                label={`手順 ${index + 1}`}
+                rows={3}
+              />
               <Button
                 className={buttonClass}
                 onPress={() => {
@@ -443,20 +435,12 @@ export const RecipeForm = ({
             <option value="book">本</option>
             <option value="other">その他</option>
           </select>
-          <TextField
-            {...getInputProps(sourceFields.sourceName, { type: "text" })}
-            className={fieldClass}
-          >
-            <Label>出典名</Label>
-            <Input className={inputClass} />
-          </TextField>
-          <TextField
-            {...getInputProps(sourceFields.sourceUrl, { type: "url" })}
-            className={fieldClass}
-          >
-            <Label>出典URL</Label>
-            <Input className={inputClass} />
-          </TextField>
+          <RecipeTextField field={sourceFields.sourceName} label="出典名" />
+          <RecipeTextField
+            field={sourceFields.sourceUrl}
+            inputType="url"
+            label="出典URL"
+          />
         </fieldset>
       ) : (
         <>
@@ -469,22 +453,20 @@ export const RecipeForm = ({
           <input
             {...getInputProps(sourceFields.sourceUrl, { type: "hidden" })}
           />
-          <TextField
-            {...getTextareaProps(fields.changeNote)}
-            className={fieldClass}
-          >
-            <Label>変更メモ</Label>
-            <TextArea className={inputClass} rows={3} />
-          </TextField>
+          <RecipeTextField
+            field={fields.changeNote}
+            label="変更メモ"
+            rows={3}
+          />
         </>
       )}
 
       {mode === "create" ? (
         <input {...getInputProps(fields.changeNote, { type: "hidden" })} />
       ) : null}
-      <button className={buttonClass} disabled={isPending} type="submit">
+      <Button className={buttonClass} isDisabled={isPending} type="submit">
         {getSubmitLabel(mode, isPending)}
-      </button>
+      </Button>
     </form>
   );
 };
