@@ -63,6 +63,9 @@ const recipeFormSchema = v.object({
   title: v.pipe(v.string(), v.trim(), v.minLength(1, "タイトルは必須です")),
 });
 
+type RecipeFormInput = v.InferInput<typeof recipeFormSchema>;
+type RecipeFormOutput = v.InferOutput<typeof recipeFormSchema>;
+
 export interface RecipeFormValue {
   changeNote: string | null;
   recipe: CreateRecipeInput;
@@ -89,6 +92,29 @@ const defaultRecipe: CreateRecipeInput = {
   steps: [],
   title: "",
 };
+
+const getFormDefaultValue = (
+  initialValue: CreateRecipeInput & { changeNote?: string | null }
+): RecipeFormInput => ({
+  changeNote: initialValue.changeNote ?? "",
+  cookingTimeMinutes: initialValue.cookingTimeMinutes?.toString() ?? "",
+  description: initialValue.description ?? "",
+  ingredients: initialValue.ingredients.map((line) => ({
+    displayName: line.displayName,
+    note: line.note ?? "",
+    quantityText: line.quantityText ?? "",
+    quantityUnit: line.quantityUnit ?? "",
+    quantityValue: line.quantityValue?.toString() ?? "",
+  })),
+  servingsText: initialValue.servingsText ?? "",
+  source: {
+    sourceName: initialValue.source.sourceName ?? "",
+    sourceType: initialValue.source.sourceType,
+    sourceUrl: initialValue.source.sourceUrl ?? "",
+  },
+  steps: initialValue.steps,
+  title: initialValue.title,
+});
 
 const formClass = css({
   display: "grid",
@@ -177,19 +203,13 @@ export const RecipeForm = ({
   mode,
   onSubmit,
 }: RecipeFormProps) => {
-  const [form, fields] = useForm({
-    defaultValue: {
-      ...initialValue,
-      changeNote: initialValue.changeNote ?? "",
-    },
-    onSubmit(event) {
-      const submission = parseWithValibot(new FormData(event.currentTarget), {
-        schema: recipeFormSchema,
-      });
-      if (submission.status !== "success") {
+  const [form, fields] = useForm<RecipeFormInput, RecipeFormOutput>({
+    defaultValue: getFormDefaultValue(initialValue),
+    onSubmit(event, { submission }) {
+      event.preventDefault();
+      if (submission?.status !== "success") {
         return;
       }
-      event.preventDefault();
       const { changeNote, ...recipe } = submission.value;
       onSubmit({ changeNote, recipe });
     },
