@@ -12,6 +12,16 @@ const link = new RPCLink({
   url: `${import.meta.env.VITE_BETTER_AUTH_URL}/api/rpc`,
 });
 
-export const orpcClient: ContractRouterClient<typeof contract> =
-  createORPCClient(link);
+const rpcClient: ContractRouterClient<typeof contract> = createORPCClient(link);
+
+export const orpcClient: ContractRouterClient<typeof contract> = {
+  recipe: {
+    create: async (...parameters) =>
+      await rpcClient.recipe.create(...parameters),
+    createRevision: async (...parameters) =>
+      await rpcClient.recipe.createRevision(...parameters),
+    get: async (...parameters) => await rpcClient.recipe.get(...parameters),
+    list: async (...parameters) => await rpcClient.recipe.list(...parameters),
+  },
+};
 export const orpc = createTanstackQueryUtils(orpcClient);
