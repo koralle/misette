@@ -30,7 +30,7 @@ catalogs:
     "@tanstack/react-query": 5.102.8
     "@tanstack/react-query-devtools": 5.102.8
     "@types/react": 19.2.18
-    "@types/react-dom": 19.2.5
+    "@types/react-dom": 19.2.7
     lucide-react: 1.41.0
     react: 19.2.8
     react-aria-components: 1.21.1
