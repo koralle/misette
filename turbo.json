@@ -20,9 +20,6 @@
       "cache": false,
       "inputs": ["wrangler.jsonc", "src/**", "worker/**"]
     },
-    "check": {
-      "dependsOn": ["^check", "typecheck", "format:check"]
-    },
     "deploy": {
       "cache": false,
       "dependsOn": ["build"]
@@ -30,15 +27,6 @@
     "dev": {
       "cache": false,
       "persistent": true
-    },
-    "format": {
-      "cache": false
-    },
-    "format:check": {
-      "cache": false
-    },
-    "lint": {
-      "cache": false
     },
     "preview": {
       "cache": false,
@@ -49,7 +37,13 @@
       "outputs": []
     },
     "test:browser": {
-      "inputs": ["src/**", "vitest.config.*", "tsconfig.*", "panda.config.*", "postcss.config.*"],
+      "inputs": [
+        "src/**",
+        "vitest.config.*",
+        "tsconfig.*",
+        "panda.config.*",
+        "postcss.config.*"
+      ],
       "outputs": []
     },
     "typecheck": {

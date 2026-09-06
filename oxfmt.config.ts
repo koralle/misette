@@ -1,25 +1,13 @@
-import { defineConfig } from 'oxfmt';
+import { defineConfig } from "oxfmt";
+import ultracite from "ultracite/oxfmt";
 
 export default defineConfig({
+  ...ultracite,
   ignorePatterns: [
-    'pnpm-lock.yaml',
-    '**/worker-configuration.d.ts',
-    '**/routeTree.gen.ts',
-    'styled-system/**',
-    '**/styled-system/**',
-    'packages/*/src/*.d.ts',
-    'packages/*/src/*.d.ts.map',
-    'packages/db/drizzle/**',
-    'packages/db/src/schema/auth.ts',
+    ...ultracite.ignorePatterns,
+    "packages/db/drizzle/**",
+    "packages/db/src/schema/auth.ts",
+    "styled-system/**",
+    "**/styled-system/**",
   ],
-  jsxSingleQuote: true,
-  printWidth: 120,
-  singleAttributePerLine: true,
-  singleQuote: true,
-  sortImports: {
-    internalPattern: ['@misette/'],
-  },
-  sortPackageJson: {
-    sortScripts: true,
-  },
 });

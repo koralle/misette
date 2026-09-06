@@ -1,27 +1,30 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 const port = 4173;
 const baseURL = `http://127.0.0.1:${String(port)}`;
+const ci = process.env["CI"];
+const isCi = ci !== undefined && ci !== "";
 
 export default defineConfig({
-  testDir: './e2e',
+  forbidOnly: isCi,
   fullyParallel: true,
-  forbidOnly: Boolean(process.env['CI']),
-  retries: process.env['CI'] ? 2 : 0,
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+    },
+  ],
+  retries: isCi ? 2 : 0,
+  testDir: "./e2e",
+  testMatch: "**/*.e2e.ts",
   use: {
     baseURL,
-    trace: 'on-first-retry',
+    trace: "on-first-retry",
   },
   webServer: {
     command: `pnpm exec vite preview --host 127.0.0.1 --port ${String(port)}`,
-    url: baseURL,
-    reuseExistingServer: !process.env['CI'],
+    reuseExistingServer: !isCi,
     timeout: 120_000,
+    url: baseURL,
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-  ],
 });

@@ -1,25 +1,25 @@
-import { defineConfig } from '@pandacss/dev';
+import { defineConfig } from "@pandacss/dev";
 
 export default defineConfig({
-  preflight: true,
-  include: ['./src/**/*.{ts,tsx}'],
   exclude: [],
-  jsxFramework: 'react',
-  outdir: 'styled-system',
+  globalCss: {
+    html: {
+      backgroundColor: "bg",
+      color: "fg",
+    },
+  },
+  include: ["./src/**/*.{ts,tsx}"],
+  jsxFramework: "react",
+  outdir: "styled-system",
+  preflight: true,
   theme: {
     extend: {
       tokens: {
         colors: {
-          fg: { value: '#111111' },
-          bg: { value: '#ffffff' },
+          bg: { value: "#ffffff" },
+          fg: { value: "#111111" },
         },
       },
-    },
-  },
-  globalCss: {
-    html: {
-      color: 'fg',
-      backgroundColor: 'bg',
     },
   },
 });

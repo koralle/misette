@@ -10,14 +10,11 @@
   "scripts": {
     "build": "turbo run build",
     "cf-typegen": "turbo run cf-typegen",
-    "check": "turbo run check --continue",
+    "check": "ultracite check --type-aware && turbo run typecheck --continue",
     "deploy": "turbo run deploy",
     "dev": "turbo run dev",
-    "format": "oxfmt .",
-    "format:check": "oxfmt . --check",
+    "fix": "ultracite fix --type-aware --no-error-on-unmatched-pattern",
     "lighthouse": "lhci autorun",
-    "lint": "oxlint .",
-    "lint:fix": "oxlint . --fix",
     "preview": "turbo run preview",
     "react:doctor": "react-doctor apps/web",
     "test": "turbo run test",
@@ -30,9 +27,11 @@
     "lefthook": "catalog:githooks",
     "oxfmt": "catalog:lint",
     "oxlint": "catalog:lint",
+    "oxlint-tsgolint": "catalog:lint",
     "react-doctor": "catalog:lint",
     "turbo": "catalog:tooling",
-    "typescript": "catalog:typescript"
+    "typescript": "catalog:typescript",
+    "ultracite": "catalog:lint"
   },
   "devEngines": {
     "packageManager": {
