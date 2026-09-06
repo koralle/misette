@@ -15,6 +15,7 @@ packages/*/src/**/*.d.ts.map
 .dev.vars
 logs/
 *.log
+__pycache__/
 .DS_Store
 .idea/
 .vscode/*
