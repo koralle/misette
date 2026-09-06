@@ -1,9 +1,9 @@
 ---
 name: Chore
 about: リファクタ、CI、依存更新、インフラなどの内部作業を定義する
-title: ''
-labels: 'chore'
-assignees: ''
+title: ""
+labels: "chore"
+assignees: ""
 ---
 
 <!--

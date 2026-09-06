@@ -1,9 +1,9 @@
 ---
 name: 機能追加・仕様変更
 about: 新しい機能や既存の振る舞いの変更を定義する
-title: ''
-labels: 'feature'
-assignees: ''
+title: ""
+labels: "feature"
+assignees: ""
 ---
 
 <!--

@@ -1,7 +1,7 @@
-import { drizzleAdapter } from '@better-auth/drizzle-adapter';
-import { betterAuth } from 'better-auth/minimal';
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { betterAuth } from "better-auth/minimal";
 
-import { authOptions } from './auth-options.ts';
+import { authOptions } from "./auth-options.ts";
 
 /**
  * CLI-only Better Auth instance. `auth generate` loads this file and does not
@@ -9,7 +9,10 @@ import { authOptions } from './auth-options.ts';
  */
 export const auth = betterAuth({
   ...authOptions,
-  database: drizzleAdapter({} as never, {
-    provider: 'sqlite',
-  }),
+  database: drizzleAdapter(
+    {},
+    {
+      provider: "sqlite",
+    }
+  ),
 });

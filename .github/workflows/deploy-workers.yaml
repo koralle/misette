@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'apps/workers/**'
-      - 'packages/**'
-      - 'pnpm-workspace.yaml'
-      - 'pnpm-lock.yaml'
-      - 'turbo.json'
-      - '.github/workflows/deploy-workers.yaml'
-      - '.github/composite-actions/cache-and-install/**'
+      - "apps/workers/**"
+      - "packages/**"
+      - "pnpm-workspace.yaml"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - ".github/workflows/deploy-workers.yaml"
+      - ".github/composite-actions/cache-and-install/**"
 
 permissions:
   contents: read

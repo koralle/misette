@@ -1,9 +1,9 @@
 ---
 name: バグ
 about: 壊れている、または意図と異なる振る舞いを定義する
-title: ''
-labels: 'bug'
-assignees: ''
+title: ""
+labels: "bug"
+assignees: ""
 ---
 
 <!--

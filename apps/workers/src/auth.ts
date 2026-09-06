@@ -1,15 +1,14 @@
-import { drizzleAdapter } from '@better-auth/drizzle-adapter';
-import { betterAuth } from 'better-auth/minimal';
-import { waitUntil } from 'cloudflare:workers';
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import * as schema from "@misette/db/schema";
+import { betterAuth } from "better-auth/minimal";
+import { waitUntil } from "cloudflare:workers";
 
-import * as schema from '@misette/db/schema';
+import { authOptions } from "./auth-options.ts";
+import { createDb } from "./db.ts";
 
-import { authOptions } from './auth-options.ts';
-import { createDb } from './db.ts';
-
-export function createAuth(env: CloudflareBindings) {
+export const createAuth = (env: CloudflareBindings) => {
   if (!env.DB) {
-    throw new Error('D1 database binding DB not configured');
+    throw new Error("D1 database binding DB not configured");
   }
   return betterAuth({
     ...authOptions,
@@ -21,10 +20,10 @@ export function createAuth(env: CloudflareBindings) {
     },
     baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(createDb(env.DB), {
-      provider: 'sqlite',
+      provider: "sqlite",
       schema,
     }),
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: [env.WEB_ORIGIN],
   });
-}
+};
