@@ -114,6 +114,20 @@ describe("recipe routes", () => {
       .toHaveTextContent("レシピを読み込めませんでした");
   });
 
+  test("必須エラーは入力と関連付く", async () => {
+    const create = vi.spyOn(orpcClient.recipe, "create");
+    const screen = await renderRoute("/recipes/new");
+
+    await userEvent.click(screen.getByRole("button", { name: "レシピを作成" }));
+
+    const title = screen.getByRole("textbox", { name: "タイトル" });
+    await expect.element(title).toHaveAttribute("aria-invalid", "true");
+    await expect
+      .element(title)
+      .toHaveAccessibleDescription("タイトルは必須です");
+    expect(create).not.toHaveBeenCalled();
+  });
+
   test("入力した内容でレシピを作成する", async () => {
     const create = vi
       .spyOn(orpcClient.recipe, "create")
