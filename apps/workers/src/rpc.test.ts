@@ -209,6 +209,41 @@ describe("recipe RPC", () => {
     });
   });
 
+  test("rejects a javascript source URL", async () => {
+    const owner = await signUp("owner@example.com");
+    const client = createClient(owner.cookie);
+    const input = recipeInput();
+    const javascriptUrl = ["javascript", "alert(1)"].join(":");
+
+    await expect(
+      client.recipe.create({
+        ...input,
+        source: {
+          ...input.source,
+          sourceUrl: javascriptUrl,
+        },
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  test("persists an https source URL", async () => {
+    const owner = await signUp("owner@example.com");
+    const client = createClient(owner.cookie);
+    const input = recipeInput();
+    const sourceUrl = "https://example.com/miso";
+
+    const created = await client.recipe.create({
+      ...input,
+      source: {
+        ...input.source,
+        sourceUrl,
+      },
+    });
+    const detail = await client.recipe.get({ recipeId: created.recipeId });
+
+    expect(detail.source.sourceUrl).toBe(sourceUrl);
+  });
+
   test("lets the owner create, list, read, and revise a recipe", async () => {
     const owner = await signUp("owner@example.com");
     const client = createClient(owner.cookie);

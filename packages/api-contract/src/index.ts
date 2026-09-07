@@ -8,6 +8,18 @@ export const recipeSourceTypes = [
   "other",
 ] as const;
 
+const isAbsoluteHttpUrl = (value: string): boolean => {
+  const normalized = value.toLowerCase();
+  return normalized.startsWith("http://") || normalized.startsWith("https://");
+};
+
+export const httpUrlSchema = v.pipe(
+  v.string(),
+  v.trim(),
+  v.url(),
+  v.check(isAbsoluteHttpUrl, "URL must be an absolute http or https URL")
+);
+
 export const recipeIngredientInputSchema = v.object({
   displayName: v.pipe(v.string(), v.trim(), v.minLength(1)),
   note: v.nullable(v.string()),
@@ -34,7 +46,7 @@ export const recipeContentInputSchema = v.object({
 export const recipeSourceInputSchema = v.object({
   sourceName: v.nullable(v.string()),
   sourceType: v.picklist(recipeSourceTypes),
-  sourceUrl: v.nullable(v.string()),
+  sourceUrl: v.nullable(httpUrlSchema),
 });
 
 export const createRecipeInputSchema = v.object({
@@ -69,7 +81,7 @@ export const recipeSourceSchema = v.object({
   id: v.string(),
   sourceName: v.nullable(v.string()),
   sourceType: v.picklist(recipeSourceTypes),
-  sourceUrl: v.nullable(v.string()),
+  sourceUrl: v.nullable(httpUrlSchema),
 });
 
 export const recipeRevisionSchema = v.object({

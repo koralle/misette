@@ -1,9 +1,11 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithValibot } from "@conform-to/valibot";
+import { httpUrlSchema } from "@misette/api-contract";
 import type { CreateRecipeInput } from "@misette/api-contract";
 import { Link } from "@tanstack/react-router";
 import {
   Button,
+  FieldError,
   Input,
   Label,
   TextArea,
@@ -25,7 +27,7 @@ const nullableMinutesSchema = v.nullish(
   null
 );
 const requiredText = (message: string) =>
-  v.pipe(v.nullish(v.string(), ""), v.trim(), v.minLength(1, message));
+  v.pipe(v.string(message), v.trim(), v.minLength(1, message));
 const recipeFormSchema = v.object({
   changeNote: nullableStringSchema,
   cookingTimeMinutes: nullableMinutesSchema,
@@ -46,7 +48,7 @@ const recipeFormSchema = v.object({
   source: v.object({
     sourceName: nullableStringSchema,
     sourceType: v.picklist(["original", "website", "book", "other"]),
-    sourceUrl: nullableStringSchema,
+    sourceUrl: v.nullish(httpUrlSchema, null),
   }),
   steps: v.optional(
     v.array(
@@ -73,7 +75,6 @@ interface RecipeFormProps {
 }
 
 interface FormField {
-  errorId: string;
   errors?: string[] | undefined;
   initialValue?: number | string | null | undefined;
   key?: string | undefined;
@@ -178,19 +179,6 @@ const toFormDefaultValue = (
   title: value.title,
 });
 
-const FieldMessages = ({
-  errors,
-  id,
-}: {
-  errors?: string[] | undefined;
-  id: string;
-}) =>
-  errors !== undefined && errors.length > 0 ? (
-    <p className={errorClass} id={id} role="alert">
-      {errors.join("、")}
-    </p>
-  ) : null;
-
 const RecipeTextField = ({
   field,
   inputType = "text",
@@ -220,7 +208,7 @@ const RecipeTextField = ({
     ) : (
       <TextArea className={inputClass} rows={rows} />
     )}
-    <FieldMessages errors={field.errors} id={field.errorId} />
+    <FieldError className={errorClass}>{field.errors?.join("、")}</FieldError>
   </TextField>
 );
 
