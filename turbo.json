@@ -33,7 +33,12 @@
       "dependsOn": ["build"]
     },
     "test": {
-      "inputs": ["src/**", "vitest.config.*", "tsconfig.*"],
+      "inputs": [
+        "src/**",
+        "vitest.config.*",
+        "tsconfig.*",
+        "$TURBO_ROOT$/packages/db/drizzle/**"
+      ],
       "outputs": []
     },
     "test:browser": {

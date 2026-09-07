@@ -13,22 +13,29 @@
     "dev": "echo 'Use pnpm --filter @misette/web dev (binding) or pnpm --filter @misette/workers dev:direct'",
     "dev:binding": "pnpm --filter @misette/web dev",
     "dev:direct": "pnpm db:reset:local && wrangler dev --env direct --port 8787 --persist-to .wrangler/state",
+    "test": "vitest run",
     "typecheck": "tsc"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "catalog:auth",
     "@logtape/hono": "catalog:workers",
     "@logtape/logtape": "catalog:workers",
+    "@misette/api-contract": "workspace:*",
     "@misette/db": "workspace:*",
+    "@orpc/server": "catalog:orpc",
     "better-auth": "catalog:auth",
     "drizzle-orm": "catalog:db",
     "hono": "catalog:workers"
   },
   "devDependencies": {
     "@misette/workspace": "workspace:*",
+    "@orpc/client": "catalog:orpc",
+    "@orpc/contract": "catalog:orpc",
     "@types/node": "catalog:typescript",
+    "miniflare": "catalog:workers",
     "rimraf": "catalog:tooling",
     "typescript": "catalog:typescript",
+    "vitest": "catalog:testing",
     "wrangler": "catalog:workers"
   }
 }
